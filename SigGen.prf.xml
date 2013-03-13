@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+This file is protected by Copyright. Please refer to the COPYRIGHT file distributed with this 
+source distribution.
+
+This file is part of REDHAWK Basic Components.
+
+REDHAWK Basic Components is free software: you can redistribute it and/or modify it under the terms of 
+the GNU Lesser General Public License as published by the Free Software Foundation, either 
+version 3 of the License, or (at your option) any later version.
+
+REDHAWK Basic Components is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+PURPOSE.  See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along with this 
+program.  If not, see http://www.gnu.org/licenses/.
+-->
+<!DOCTYPE properties PUBLIC "-//JTRS//DTD SCA V2.2.2 PRF//EN" "properties.dtd">
+<properties>
+  <simple id="frequency" mode="readwrite" type="double">
+    <value>1000</value>
+    <units>Hz</units>
+    <kind kindtype="configure"/>
+    <action type="external"/>
+  </simple>
+  <simple id="sample_rate" mode="readwrite" type="double">
+    <value>5000</value>
+    <units>Hz</units>
+    <kind kindtype="configure"/>
+    <action type="external"/>
+  </simple>
+  <simple id="magnitude" mode="readwrite" type="double">
+    <value>1.0</value>
+    <kind kindtype="configure"/>
+    <action type="external"/>
+  </simple>
+  <simple id="shape" mode="readwrite" type="string">
+    <value>sine</value>
+    <enumerations>
+      <enumeration label="sine" value="sine"/>
+      <enumeration label="square" value="square"/>
+      <enumeration label="triangle" value="triangle"/>
+      <enumeration label="sawtooth" value="sawtooth"/>
+      <enumeration label="pulse" value="pulse"/>
+      <enumeration label="constant" value="constant"/>
+      <enumeration label="whitenoise" value="whitenoise"/>
+      <enumeration label="lrs" value="lrs"/>
+    </enumerations>
+    <kind kindtype="configure"/>
+    <action type="external"/>
+  </simple>
+  <simple id="xfer_len" mode="readwrite" type="long">
+    <value>1000</value>
+    <kind kindtype="configure"/>
+    <action type="external"/>
+  </simple>
+  <simple id="throttle" mode="readwrite" type="boolean">
+    <description>Throttles the output data rate to approximately sample_rate</description>
+    <value>true</value>
+    <kind kindtype="configure"/>
+    <action type="external"/>
+  </simple>
+  <simple id="stream_id" mode="readwrite" type="string">
+    <value>SigGen Stream</value>
+    <kind kindtype="configure"/>
+    <action type="external"/>
+  </simple>
+</properties>
