@@ -1,2 +1,4 @@
 .settings/
-*.pyc
+cpp/SigGen
+java/SigGen.jar
+java/bin
