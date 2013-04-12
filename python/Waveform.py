@@ -61,16 +61,28 @@ class Waveform:
         factor = -2.0 / math.log(10.0)
         sis = float(self.seed)/self.T26
         
-        for i in range(0, n*spa, 2):
+        maxIndex = n*spa
+        #Do this is in a while loop instead of a for loop
+        #because we don't know how many times the sum is invalid 
+        #we are forced to continue
+        i=0
+        while i < maxIndex:
+            sis = sis*self.A + self.BI;
+            sis = sis - float(int(sis))
+            v1 = float(sis)
+            v1 = v1+v1-1
+
             sis = sis*self.A + self.BI;
             sis = sis - float(int(sis))
             v2 = float(sis)
             v2 = v2+v2-1
+
             sum = v1*v1 + v2*v2
-            if sum >= 1.0: continue
+            if sum >= 1.0 or sum <1e-20: continue
             sum = fdev * float(math.sqrt(factor*math.log(sum)/sum))
             outbuff[i] = v1*sum
             outbuff[i+1] = v2*sum
+            i+=2
         
         self.seed = int(sis*self.T26)
         
