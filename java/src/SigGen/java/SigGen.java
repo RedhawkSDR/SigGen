@@ -217,13 +217,13 @@ public class SigGen extends Resource implements Runnable {
     	}
     };
 	
-	/**
-     * @generated
+    /**
+     * @generated NOT
      */
     public MyBULKIO_dataDoubleOutPort port_out;
 
     /**
-     * @generated
+     * @generated NOT
      */
     public SigGen() 
     {

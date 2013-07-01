@@ -53,8 +53,8 @@ BuildRequires: libomniORB4.1-devel
 BuildRequires: apache-log4cxx-devel >= 0.10
 
 # Java requirements
-Requires: java
-BuildRequires: jdk
+Requires: java >= 1.6
+BuildRequires: java-devel >= 1.6
 
 # Python requirements
 Requires: python omniORBpy
@@ -65,8 +65,10 @@ BuildRequires: python-devel >= 2.3
 %description
 Component %{name}
 
+
 %prep
 %setup
+
 
 %build
 # Implementation python
@@ -74,22 +76,23 @@ pushd python
 ./reconf
 %define _bindir %{_prefix}/dom/components/SigGen/python
 %configure
-make
+make %{?_smp_mflags}
 popd
 # Implementation cpp
 pushd cpp
 ./reconf
 %define _bindir %{_prefix}/dom/components/SigGen/cpp
 %configure
-make
+make %{?_smp_mflags}
 popd
 # Implementation java
 pushd java
 ./reconf
 %define _bindir %{_prefix}/dom/components/SigGen/java
 %configure
-make
+make %{?_smp_mflags}
 popd
+
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -109,11 +112,13 @@ pushd java
 make install DESTDIR=$RPM_BUILD_ROOT
 popd
 
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+
 %files
-%defattr(-,redhawk,redhawk)
+%defattr(-,redhawk,redhawk,-)
 %dir %{_prefix}/dom/components/%{name}
 %{_prefix}/dom/components/%{name}/SigGen.spd.xml
 %{_prefix}/dom/components/%{name}/SigGen.prf.xml

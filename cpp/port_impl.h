@@ -30,9 +30,9 @@ class SigGen_i;
 
 #define CORBA_MAX_TRANSFER_BYTES omniORB::giopMaxMsgSize()
 
- 
+
 #include "BULKIO/bio_dataDouble.h"
- 
+
 // ----------------------------------------------------------------------------------------
 // BULKIO_dataDouble_Out_i declaration
 // ----------------------------------------------------------------------------------------

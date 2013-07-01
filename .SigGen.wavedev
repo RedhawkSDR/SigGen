@@ -19,38 +19,38 @@ program.  If not, see http://www.gnu.org/licenses/.
 <codegen:WaveDevSettings xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:codegen="http://www.redhawk.gov/model/codegen">
   <implSettings key="python">
     <value outputDir="python" template="gov.redhawk.ide.codegen.jet.python.pattern.PullPortDataTemplate" generatorId="gov.redhawk.ide.codegen.jet.python.PythonGenerator">
-      <generatedFileCRCs crc="1695733633" file="SigGen_base.py"/>
+      <generatedFileCRCs crc="3292105566" file="SigGen_base.py"/>
       <generatedFileCRCs crc="1746641546" file="reconf"/>
       <generatedFileCRCs crc="718548437" file="SigGen.py"/>
-      <generatedFileCRCs crc="1275246161" file="../SigGen.spec"/>
+      <generatedFileCRCs crc="1472578726" file="../SigGen.spec"/>
       <generatedFileCRCs crc="4180066440" file="configure.ac"/>
-      <generatedFileCRCs crc="2902835028" file="Makefile.am"/>
+      <generatedFileCRCs crc="2954523480" file="Makefile.am"/>
     </value>
   </implSettings>
   <implSettings key="cpp">
     <value outputDir="cpp" template="gov.redhawk.ide.codegen.jet.cplusplus.PullPortDataTemplate" generatorId="gov.redhawk.ide.codegen.jet.cplusplus.CplusplusGenerator" primary="true">
-      <generatedFileCRCs crc="1275246161" file="../SigGen.spec"/>
-      <generatedFileCRCs crc="1393366605" file="Makefile.am"/>
+      <generatedFileCRCs crc="1472578726" file="../SigGen.spec"/>
+      <generatedFileCRCs crc="506305875" file="Makefile.am"/>
       <generatedFileCRCs crc="3941884693" file="SigGen.cpp"/>
       <generatedFileCRCs crc="3491018555" file="SigGen.h"/>
-      <generatedFileCRCs crc="2543848266" file="SigGen_base.cpp"/>
+      <generatedFileCRCs crc="3136751983" file="SigGen_base.cpp"/>
       <generatedFileCRCs crc="1256200548" file="SigGen_base.h"/>
-      <generatedFileCRCs crc="864280150" file="build.sh"/>
+      <generatedFileCRCs crc="3675748468" file="build.sh"/>
       <generatedFileCRCs crc="3639835987" file="configure.ac"/>
-      <generatedFileCRCs crc="2163509846" file="main.cpp"/>
-      <generatedFileCRCs crc="3338708674" file="port_impl.cpp"/>
-      <generatedFileCRCs crc="2802123713" file="port_impl.h"/>
+      <generatedFileCRCs crc="2861950104" file="main.cpp"/>
+      <generatedFileCRCs crc="4207911110" file="port_impl.cpp"/>
+      <generatedFileCRCs crc="2236270343" file="port_impl.h"/>
       <generatedFileCRCs crc="1746641546" file="reconf"/>
-      <generatedFileCRCs crc="4037455673" file="struct_props.h"/>
+      <generatedFileCRCs crc="1942573142" file="struct_props.h"/>
     </value>
   </implSettings>
   <implSettings key="java">
     <value outputDir="java" template="gov.redhawk.ide.codegen.jet.java.JavaGenerator" generatorId="gov.redhawk.ide.codegen.jet.java.JavaGenerator">
       <properties id="java_package" value="SigGen.java"/>
       <properties id="use_jni" value="TRUE"/>
-      <generatedFileCRCs crc="1275246161" file="../SigGen.spec"/>
-      <generatedFileCRCs crc="2375070158" file="Makefile.am"/>
-      <generatedFileCRCs crc="3561010220" file="configure.ac"/>
+      <generatedFileCRCs crc="1472578726" file="../SigGen.spec"/>
+      <generatedFileCRCs crc="178754956" file="Makefile.am"/>
+      <generatedFileCRCs crc="1096532929" file="configure.ac"/>
       <generatedFileCRCs crc="1746641546" file="reconf"/>
       <generatedFileCRCs crc="3616294830" file="startJava.sh"/>
     </value>

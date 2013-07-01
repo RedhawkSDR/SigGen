@@ -16,14 +16,13 @@
 # You should have received a copy of the GNU Lesser General Public License along with this 
 # program.  If not, see http://www.gnu.org/licenses/.
 #
-#
 # AUTO-GENERATED CODE.  DO NOT MODIFY!
 #
 # Source: SigGen.spd.xml
-# Generated on: Fri Mar 08 18:33:58 EST 2013
-# Redhawk IDE
-# Version:M.1.8.3
-# Build id: v201302191304
+# Generated on: Fri Jul 05 15:49:50 EDT 2013
+# REDHAWK IDE
+# Version: 1.8.5
+# Build id: N201307031521
 from ossie.cf import CF, CF__POA
 from ossie.utils import uuid
 
@@ -393,13 +392,12 @@ class PortBULKIODataDoubleOut_i(SigGen_base.PortBULKIODataDoubleOut):
         self.port_lock.acquire()
         self.sriDict[H.streamID] = copy.deepcopy(H)
         try:
-            try:
-                for connId, port in self.outConnections.items():
-                    if port != None:
+            for connId, port in self.outConnections.items():
+                if port != None:
+                    try:
                         port.pushSRI(H)
-            except Exception:
-                self.parent._log.exception("The call to pushSRI failed on port %s connection %s instance %s", self.name, connId, port)
-                raise
+                    except Exception:
+                        self.parent._log.exception("The call to pushSRI failed on port %s connection %s instance %s", self.name, connId, port)
         finally:
             self.refreshSRI = False
             self.port_lock.release()
@@ -414,14 +412,13 @@ class PortBULKIODataDoubleOut_i(SigGen_base.PortBULKIODataDoubleOut):
         self.port_lock.acquire()
 
         try:    
-            try:
-                for connId, port in self.outConnections.items():
-                    if port != None:
+            for connId, port in self.outConnections.items():
+                if port != None:
+                    try:
                         port.pushPacket(data, T, EOS, streamID)
                         self.stats.update(len(data), 0, streamID, connId)
-            except Exception:
-                self.parent._log.exception("The call to pushPacket failed on port %s connection %s instance %s", self.name, connId, port)
-                raise
+                    except Exception:
+                        self.parent._log.exception("The call to pushPacket failed on port %s connection %s instance %s", self.name, connId, port)
             if EOS==True:
                 if self.sriDict.has_key(streamID):
                     tmp = self.sriDict.pop(streamID)

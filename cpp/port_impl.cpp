@@ -15,21 +15,20 @@
  * You should have received a copy of the GNU Lesser General Public License along with this 
  * program.  If not, see http://www.gnu.org/licenses/.
  */
- 
+
 /*******************************************************************************************
 
     AUTO-GENERATED CODE. DO NOT MODIFY
 
  	Source: SigGen.spd.xml
- 	Generated on: Fri Mar 08 18:34:00 EST 2013
- 	Redhawk IDE
- 	Version:M.1.8.3
- 	Build id: v201302191304
+ 	Generated on: Fri Jul 05 15:49:52 EDT 2013
+ 	REDHAWK IDE
+ 	Version: 1.8.5
+ 	Build id: N201307031521
 
 *******************************************************************************************/
 
 #include "SigGen.h"
- 
 // ----------------------------------------------------------------------------------------
 // BULKIO_dataDouble_Out_i definition
 // ----------------------------------------------------------------------------------------
