@@ -40,7 +40,6 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         self.assertNotEqual(self.comp, None)
         self.assertEqual(self.comp.ref._non_existent(), False)
         self.assertEqual(self.comp.ref._is_a("IDL:CF/Resource:1.0"), True)
-        self.assertEqual(self.spd.get_id(), self.comp.ref._get_identifier())
         
         #######################################################################
         # Simulate regular component startup

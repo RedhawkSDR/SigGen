@@ -18,7 +18,7 @@
 
 SigGen.jar: $(SigGen_jar_SOURCES)
 	mkdir -p bin
-	$(JAVAC) -cp $(OSSIE_HOME)/lib/CFInterfaces.jar:$(OSSIE_HOME)/lib/log4j-1.2.15.jar:$(OSSIE_HOME)/lib/ossie.jar:$(OSSIE_HOME)/lib/BULKIOInterfaces.jar -d bin $(SigGen_jar_SOURCES)
+	$(JAVAC) -cp $(OSSIE_HOME)/lib/CFInterfaces.jar:$(OSSIE_HOME)/lib/log4j-1.2.15.jar:$(OSSIE_HOME)/lib/ossie.jar:$(OSSIE_HOME)/lib/BULKIOInterfaces.jar:$(OSSIE_HOME)/lib/bulkio.jar -d bin $(SigGen_jar_SOURCES)
 	$(JAR) cf ./SigGen.jar -C bin .
 
 clean-local:
@@ -43,7 +43,7 @@ bin_PROGRAMS = SigGen.jar
 SigGen_jar_SOURCES := $(shell find ./src -name "*.java")
 
 xmldir = $(prefix)/dom/components/SigGen/
-dist_xml_DATA = ../SigGen.prf.xml ../SigGen.scd.xml ../SigGen.spd.xml 
+dist_xml_DATA = ../SigGen.scd.xml ../SigGen.prf.xml ../SigGen.spd.xml
 
 domdir = $(prefix)/dom/components/SigGen/java/
 dist_dom_SCRIPTS = startJava.sh

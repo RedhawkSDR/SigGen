@@ -21,14 +21,13 @@
 #include <boost/thread.hpp>
 #include <ossie/Resource_impl.h>
 
-#include "port_impl.h"
+#include "bulkio/bulkio.h"
 
 #define NOOP 0
 #define FINISH -1
 #define NORMAL 1
 
 class SigGen_base;
-
 
 template < typename TargetClass >
 class ProcessThread
@@ -98,9 +97,7 @@ class ProcessThread
 
 class SigGen_base : public Resource_impl
 {
-    friend class BULKIO_dataDouble_Out_i;
-
-    public: 
+    public:
         SigGen_base(const char *uuid, const char *label);
 
         void start() throw (CF::Resource::StartError, CORBA::SystemException);
@@ -119,7 +116,7 @@ class SigGen_base : public Resource_impl
 
     protected:
         ProcessThread<SigGen_base> *serviceThread; 
-        boost::mutex serviceThreadLock;  
+        boost::mutex serviceThreadLock;
 
         // Member variables exposed as properties
         double frequency;
@@ -131,8 +128,8 @@ class SigGen_base : public Resource_impl
         std::string stream_id;
 
         // Ports
-        BULKIO_dataDouble_Out_i *out;
-    
+        bulkio::OutDoublePort *out;
+
     private:
         void construct();
 

@@ -22,25 +22,17 @@
 /*******************************************************************************************
 
     AUTO-GENERATED CODE. DO NOT MODIFY
-    
- 	Source: SigGen.spd.xml
- 	Generated on: Fri Jul 05 15:49:52 EDT 2013
- 	REDHAWK IDE
- 	Version: 1.8.5
- 	Build id: N201307031521
-
-*******************************************************************************************/
-
-/******************************************************************************************
 
     The following class functions are for the base class for the component class. To
     customize any of these functions, do not modify them here. Instead, overload them
     on the child class
 
 ******************************************************************************************/
- 
+
 SigGen_base::SigGen_base(const char *uuid, const char *label) :
-                                     Resource_impl(uuid, label), serviceThread(0) {
+    Resource_impl(uuid, label),
+    serviceThread(0)
+{
     construct();
 }
 
@@ -51,7 +43,7 @@ void SigGen_base::construct()
     serviceThread = 0;
     
     PortableServer::ObjectId_var oid;
-    out = new BULKIO_dataDouble_Out_i("out", this);
+    out = new bulkio::OutDoublePort("out");
     oid = ossie::corba::RootPOA()->activate_object(out);
 
     registerOutPort(out, out->_this());
@@ -99,7 +91,6 @@ CORBA::Object_ptr SigGen_base::getPort(const char* _id) throw (CORBA::SystemExce
 
     std::map<std::string, Port_Provides_base_impl *>::iterator p_in = inPorts.find(std::string(_id));
     if (p_in != inPorts.end()) {
-
     }
 
     std::map<std::string, CF::Port_var>::iterator p_out = outPorts_var.find(std::string(_id));
@@ -124,73 +115,73 @@ void SigGen_base::releaseObject() throw (CORBA::SystemException, CF::LifeCycle::
     releaseOutPorts();
 
     delete(out);
- 
+
     Resource_impl::releaseObject();
 }
 
 void SigGen_base::loadProperties()
 {
     addProperty(frequency,
-                1000, 
-               "frequency",
-               "",
-               "readwrite",
-               "Hz",
-               "external",
-               "configure");
+                1000,
+                "frequency",
+                "",
+                "readwrite",
+                "Hz",
+                "external",
+                "configure");
 
     addProperty(sample_rate,
-                5000, 
-               "sample_rate",
-               "",
-               "readwrite",
-               "Hz",
-               "external",
-               "configure");
+                5000,
+                "sample_rate",
+                "",
+                "readwrite",
+                "Hz",
+                "external",
+                "configure");
 
     addProperty(magnitude,
-                1.0, 
-               "magnitude",
-               "",
-               "readwrite",
-               "",
-               "external",
-               "configure");
+                1.0,
+                "magnitude",
+                "",
+                "readwrite",
+                "",
+                "external",
+                "configure");
 
     addProperty(shape,
-                "sine", 
-               "shape",
-               "",
-               "readwrite",
-               "",
-               "external",
-               "configure");
+                "sine",
+                "shape",
+                "",
+                "readwrite",
+                "",
+                "external",
+                "configure");
 
     addProperty(xfer_len,
-                1000, 
-               "xfer_len",
-               "",
-               "readwrite",
-               "",
-               "external",
-               "configure");
+                1000,
+                "xfer_len",
+                "",
+                "readwrite",
+                "",
+                "external",
+                "configure");
 
     addProperty(throttle,
-                true, 
-               "throttle",
-               "",
-               "readwrite",
-               "",
-               "external",
-               "configure");
+                true,
+                "throttle",
+                "",
+                "readwrite",
+                "",
+                "external",
+                "configure");
 
     addProperty(stream_id,
-                "SigGen Stream", 
-               "stream_id",
-               "",
-               "readwrite",
-               "",
-               "external",
-               "configure");
+                "SigGen Stream",
+                "stream_id",
+                "",
+                "readwrite",
+                "",
+                "external",
+                "configure");
 
 }

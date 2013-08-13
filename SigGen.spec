@@ -36,31 +36,13 @@ Group: REDHAWK/Components
 Source: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-root
 
-Requires: redhawk >= 1.8
-BuildRequires: redhawk >= 1.8
+Requires: redhawk >= 1.9
+BuildRequires: redhawk-devel >= 1.9
 BuildRequires: autoconf automake libtool
 
 # Interface requirements
 Requires: bulkioInterfaces
 BuildRequires: bulkioInterfaces
-
-# C++ requirements
-Requires: libomniORB4.1
-Requires: boost >= 1.41
-Requires: apache-log4cxx >= 0.10
-BuildRequires: boost-devel >= 1.41
-BuildRequires: libomniORB4.1-devel
-BuildRequires: apache-log4cxx-devel >= 0.10
-
-# Java requirements
-Requires: java >= 1.6
-BuildRequires: java-devel >= 1.6
-
-# Python requirements
-Requires: python omniORBpy
-BuildRequires: libomniORBpy3-devel
-BuildRequires: python-devel >= 2.3
-
 
 %description
 Component %{name}
@@ -98,17 +80,17 @@ popd
 rm -rf $RPM_BUILD_ROOT
 # Implementation python
 pushd python
-%define _bindir %{_prefix}/dom/components/SigGen/python 
+%define _bindir %{_prefix}/dom/components/SigGen/python
 make install DESTDIR=$RPM_BUILD_ROOT
 popd
 # Implementation cpp
 pushd cpp
-%define _bindir %{_prefix}/dom/components/SigGen/cpp 
+%define _bindir %{_prefix}/dom/components/SigGen/cpp
 make install DESTDIR=$RPM_BUILD_ROOT
 popd
 # Implementation java
 pushd java
-%define _bindir %{_prefix}/dom/components/SigGen/java 
+%define _bindir %{_prefix}/dom/components/SigGen/java
 make install DESTDIR=$RPM_BUILD_ROOT
 popd
 
@@ -118,11 +100,12 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %files
-%defattr(-,redhawk,redhawk,-)
+%defattr(-,redhawk,redhawk)
 %dir %{_prefix}/dom/components/%{name}
-%{_prefix}/dom/components/%{name}/SigGen.spd.xml
-%{_prefix}/dom/components/%{name}/SigGen.prf.xml
 %{_prefix}/dom/components/%{name}/SigGen.scd.xml
+%{_prefix}/dom/components/%{name}/SigGen.prf.xml
+%{_prefix}/dom/components/%{name}/SigGen.spd.xml
 %{_prefix}/dom/components/%{name}/python
 %{_prefix}/dom/components/%{name}/cpp
 %{_prefix}/dom/components/%{name}/java
+

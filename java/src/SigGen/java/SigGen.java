@@ -17,260 +17,70 @@
  */
 package SigGen.java;
 
-
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
-import org.omg.CORBA.ORB;
-import org.omg.PortableServer.POA;
-import org.omg.PortableServer.POAPackage.ServantNotActive;
-import org.omg.PortableServer.POAPackage.WrongPolicy;
-import org.omg.CosNaming.NamingContextPackage.CannotProceed;
-import org.omg.CosNaming.NamingContextPackage.InvalidName;
-import org.omg.CosNaming.NamingContextPackage.NotFound;
-import CF.PropertiesHolder;
-import CF.ResourceHelper;
-import CF.UnknownProperties;
-import CF.LifeCyclePackage.InitializeError;
-import CF.LifeCyclePackage.ReleaseError;
-import CF.InvalidObjectReference;
-import CF.PropertySetPackage.InvalidConfiguration;
-import CF.PropertySetPackage.PartialConfiguration;
-import CF.ResourcePackage.StartError;
-import CF.ResourcePackage.StopError;
-import CF.DataType;
 
-import org.omg.CORBA.UserException;
-import org.omg.CosNaming.NameComponent;
-import org.apache.log4j.Logger;
-import org.ossie.component.*;
-import org.ossie.properties.*;
-import SigGen.java.ports.*;
+import org.ossie.properties.PropertyListener;
 
 import BULKIO.PrecisionUTCTime;
 import BULKIO.StreamSRI;
+import CF.DataType;
+import CF.PropertySetPackage.InvalidConfiguration;
 
 /**
- * This is the component code. This file contains all the access points
- * you need to use to be able to access all input and output ports,
- * respond to incoming data, and perform general component housekeeping
+ * This is the component code. This file contains the derived class where custom
+ * functionality can be added to the component. You may add methods and code to
+ * this class to handle property changes, respond to incoming data, and perform
+ * general component housekeeping
  *
  * Source: SigGen.spd.xml
- * Generated on: Wed Feb 27 14:15:15 EST 2013
- * Redhawk IDE
- * Version:M.1.8.3
- * Build id: v201302191304 
- 
- * @generated
  */
-public class SigGen extends Resource implements Runnable {
-    /**
-     * @generated
-     */
-    public final static Logger logger = Logger.getLogger(SigGen.class.getName());
-    
-	/**
-	 * The property frequency
-	 * If the meaning of this property isn't clear, a description should be added.
-	 * 
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	public final SimpleProperty<Double> frequency =
-		new SimpleProperty<Double>(
-			"frequency", //id
-			null, //name
-			"double", //type
-			1000.0, //default value
-			"readwrite", //mode
-			"external", //action
-			new String[] {"configure"} //kind
-			);
-    
-	/**
-	 * The property sample_rate
-	 * If the meaning of this property isn't clear, a description should be added.
-	 * 
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	public final SimpleProperty<Double> sample_rate =
-		new SimpleProperty<Double>(
-			"sample_rate", //id
-			null, //name
-			"double", //type
-			5000.0, //default value
-			"readwrite", //mode
-			"external", //action
-			new String[] {"configure"} //kind
-			);
-    
-	/**
-	 * The property magnitude
-	 * If the meaning of this property isn't clear, a description should be added.
-	 * 
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	public final SimpleProperty<Double> magnitude =
-		new SimpleProperty<Double>(
-			"magnitude", //id
-			null, //name
-			"double", //type
-			1.0, //default value
-			"readwrite", //mode
-			"external", //action
-			new String[] {"configure"} //kind
-			);
-    
-	/**
-	 * The property shape
-	 * If the meaning of this property isn't clear, a description should be added.
-	 * 
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	public final SimpleProperty<String> shape =
-		new SimpleProperty<String>(
-			"shape", //id
-			null, //name
-			"string", //type
-			"sine", //default value
-			"readwrite", //mode
-			"external", //action
-			new String[] {"configure"} //kind
-			);
-    
-	/**
-	 * The property xfer_len
-	 * If the meaning of this property isn't clear, a description should be added.
-	 * 
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	public final SimpleProperty<Integer> xfer_len =
-		new SimpleProperty<Integer>(
-			"xfer_len", //id
-			null, //name
-			"long", //type
-			1000, //default value
-			"readwrite", //mode
-			"external", //action
-			new String[] {"configure"} //kind
-			);
-
-	/**
-	 * The property throttle
-	 * If the meaning of this property isn't clear, a description should be added.
-	 * 
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	public final SimpleProperty<Boolean> throttle =
-		new SimpleProperty<Boolean>(
-			"throttle", //id
-			null, //name
-			"boolean", //type
-			true, //default value
-			"readwrite", //mode
-			"external", //action
-			new String[] {"configure"} //kind
-			);
-    
-	/**
-	 * The property stream_id
-	 * If the meaning of this property isn't clear, a description should be added.
-	 * 
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	public final SimpleProperty<String> stream_id =
-		new SimpleProperty<String>(
-			"stream_id", //id
-			null, //name
-			"string", //type
-			"SigGen Stream", //default value
-			"readwrite", //mode
-			"external", //action
-			new String[] {"configure"} //kind
-			); 
-    // Provides/inputs
-
-    // Uses/outputs
-    public class MyBULKIO_dataDoubleOutPort extends BULKIO_dataDoubleOutPort
-    {
-    	public MyBULKIO_dataDoubleOutPort(String portName) {
-			super(portName);
-		}
-
-		public boolean hasSri(String streamID)
-    	{
-    		return this.currentSRIs.containsKey(streamID);
-    	}
-    };
+public class SigGen extends SigGen_base {
+	double[] data = new double[this.xfer_len.getValue()];
+	double phase = 0;
+	double chirp = 0;
+	double sample_time_delta;
+	double delta_phase;
+	double delta_phase_offset;
 	
-    /**
-     * @generated NOT
-     */
-    public MyBULKIO_dataDoubleOutPort port_out;
-
-    /**
-     * @generated NOT
-     */
-    public SigGen() 
-    {
-        super();                
-        addProperty(frequency);
-        addProperty(sample_rate);
-        addProperty(magnitude);
-        addProperty(shape);
-        addProperty(xfer_len);
-        addProperty(throttle);
-        addProperty(stream_id);
-
-        // Provides/input
-
-        // Uses/output
-        this.port_out = new MyBULKIO_dataDoubleOutPort("out");
-        this.addPort("out", this.port_out);
-    
-       //begin-user-code
-       //end-user-code
-    }
-
-    //begin-user-code
-    private StreamSRI sri = new StreamSRI();
+	private StreamSRI sri = new StreamSRI();
     private boolean sriUpdate;
-    //end-user-code
-    /**
+    
+	/**
+     * This is the component constructor. In this method, you may add additional
+     * functionality to properties, such as listening for changes and handling
+     * allocation, and set up internal state for your component.
      *
-     * Main processing thread
+     * A component may listen for external changes to properties (i.e., by a
+     * call to configure) using the PropertyListener interface. Listeners are
+     * registered by calling addPropertyListener() on the property instance
+     * with an object that implements the PropertyListener interface for that
+     * data type (e.g., "PropertyListener<Float>" for a float property). More
+     * than one listener can be connected to a property.
      *
-     * General functionality:
-     *    This function is running as a separate thread from the component's main thread. 
-     * 
-     * @generated
+     *   Example:
+     *       // This example makes use of the following properties:
+     *       //  - A float value called scaleValue
+     *       // The file must import "org.ossie.properties.PropertyListener"
+     *
+     *       this.scaleValue.addPropertyListener(new PropertyListener<Float>() {
+     *           public void valueChanged(Float oldValue, Float newValue) {
+     *               logger.debug("Changed scaleValue " + oldValue + " to " + newValue);
+     *           }
+     *       });
+     *
+     * The recommended practice is for the implementation of valueChanged() to
+     * contain only glue code to dispatch the call to a private method on the
+     * component class.
      */
-    public void run() 
-    {
-        //begin-user-code
-    	double[] data = new double[this.xfer_len.getValue()];
-		double phase = 0;
-		double chirp = 0;
-		double sample_time_delta;
-		double delta_phase;
-		double delta_phase_offset;
-
-		sri = new StreamSRI();
-		sri.hversion = 1;
+    public SigGen() {
+        super();
+        data = new double[this.xfer_len.getValue()];
+		phase = 0;
+		chirp = 0;
+        
+        sri = new StreamSRI();
+        sri.hversion = 1;
 		sri.mode = 0;
 		sri.xdelta = 0.0;
 		sri.ydelta = 1.0;
@@ -278,143 +88,222 @@ public class SigGen extends Resource implements Runnable {
 		sri.xunits = 1; // TIME_S
 		sri.streamID = (this.stream_id.getValue() != null) ? this.stream_id.getValue() : "";
 		sriUpdate = true;
-        //end-user-code
-        
-        while(this.started())
-        {
-            //begin-user-code
-        	try {
-				/// If the transfer length has changed, reallocate the buffer
-				if (this.xfer_len.getValue() != data.length) {
-					data = new double[this.xfer_len.getValue()];
+		this.stream_id.addChangeListener(new PropertyListener<String>() {
+		                 public void valueChanged(String oldValue, String newValue) {
+		                     if (newValue !=null)
+		                	 stream_id.setValue(newValue);
+		                	 sriUpdate = true;
+		                 }
+		            });
+	
+		this.sample_rate.addChangeListener(new PropertyListener<Double>() {
+			public void valueChanged(Double newValue, Double oldValue) {
+				if (newValue >0)
+				{
+					sample_rate.setValue(newValue);
 					sriUpdate = true;
 				}
-
-				sample_time_delta = (1.0/this.sample_rate.getValue());
-				if (sample_time_delta != sri.xdelta) {
-					sri.xdelta = sample_time_delta;
-					sriUpdate = true;
+				else
+				{
+					
 				}
-
-				if (sriUpdate || (!this.port_out.hasSri(sri.streamID))) {
-					this.port_out.pushSRI(sri);
-				}
-				sriUpdate = false;
-
-				delta_phase = this.frequency.getValue() * sample_time_delta;
-				delta_phase_offset = chirp * sample_time_delta * sample_time_delta;
-				if ((delta_phase < 0) && (!this.shape.getValue().equals("sine"))) {
-					delta_phase = -delta_phase;
-				}
-
-				// Generate the Waveform
-				if (this.shape.getValue().equals("sine")) {
-					Waveform.sincos(data, this.magnitude.getValue(), phase, delta_phase, this.xfer_len.getValue(), 1);
-				} else if (this.shape.getValue().equals("square")) {
-					Waveform.square(data, this.magnitude.getValue(), phase, delta_phase, this.xfer_len.getValue(), 1);
-				} else if (this.shape.getValue().equals("triangle")) {
-					Waveform.triangle(data, this.magnitude.getValue(), phase, delta_phase, this.xfer_len.getValue(), 1);
-				} else if (this.shape.getValue().equals("sawtooth")) {
-					Waveform.sawtooth(data, this.magnitude.getValue(), phase, delta_phase, this.xfer_len.getValue(), 1);
-				} else if (this.shape.getValue().equals("pulse")) {
-					Waveform.pulse(data, this.magnitude.getValue(), phase, delta_phase, this.xfer_len.getValue(), 1);
-				} else if (this.shape.getValue().equals("constant")) {
-					Waveform.constant(data, this.magnitude.getValue(), this.xfer_len.getValue(), 1);
-				} else if (this.shape.getValue().equals("whitenoise")) {
-					Waveform.whitenoise(data, this.magnitude.getValue(), this.xfer_len.getValue(), 1);
-				} else if (this.shape.getValue().equals("lrs")) {
-					Waveform.lrs(data, this.magnitude.getValue(), this.xfer_len.getValue(), 1, 1);
-				}
-
-				phase += delta_phase*this.xfer_len.getValue(); // increment phase
-				phase -= Math.floor(phase); // modulo 1.0
-
-				// Create a CPU time-stamp
-				long tmp_time = System.currentTimeMillis();
-				double wsec = tmp_time / 1000;
-				double fsec = (tmp_time % 1000) / 1000.;
-				PrecisionUTCTime tstamp = new PrecisionUTCTime(BULKIO.TCM_CPU.value, (short)1, (short)0, wsec, fsec);
-
-				// Push the data
-				this.port_out.pushPacket(data, 
-						tstamp, 
-						false, 
-						(this.stream_id.getValue() != null) ? this.stream_id.getValue() : "");
-
-				// If we are throttling, wait...otherwise run at full speed
-				if (this.throttle.getValue() == true) {
-					long wait_amt = (long)(this.xfer_len.getValue() * sample_time_delta * 1000);
-					try {
-						Thread.sleep(wait_amt);
-					} catch (InterruptedException e) {
-						break;
-					}
-				}
-			} catch (Throwable t) {
-				logger.error("Error in processing loop", t);
 			}
-            //end-user-code
-        }
-        
-        //begin-user-code
-        //end-user-code
-    }
-        
-    /**
-     * The main function of your component.  If no args are provided, then the
-     * CORBA object is not bound to an SCA Domain or NamingService and can
-     * be run as a standard Java application.
-     * 
-     * @param args
-     * @generated
-     */
-    public static void main(String[] args) 
-    {
-        final Properties orbProps = new Properties();
-
-        //begin-user-code
-        // TODO You may add extra startup code here, for example:
-        // orbProps.put("com.sun.CORBA.giop.ORBFragmentSize", Integer.toString(fragSize));
-        //end-user-code
-
-        try {
-            Resource.start_component(SigGen.class, args, orbProps);
-        } catch (InvalidObjectReference e) {
-            e.printStackTrace();
-        } catch (NotFound e) {
-            e.printStackTrace();
-        } catch (CannotProceed e) {
-            e.printStackTrace();
-        } catch (InvalidName e) {
-            e.printStackTrace();
-        } catch (ServantNotActive e) {
-            e.printStackTrace();
-        } catch (WrongPolicy e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-
-        //begin-user-code
-        // TODO You may add extra shutdown code here
-        //end-user-code
+		});
+		
     }
     
+    public boolean hasSri(String streamID)
+	{
+		return Arrays.asList(port_out.activeSRIs()).contains(streamID);
+	}
 
-    //begin-user-code
-    @Override
-    public void configure(DataType[] configProperties)
-    		throws InvalidConfiguration, PartialConfiguration {
-    	super.configure(configProperties);
-    	
-    	for (int i=0; i < configProperties.length; i++) {
-    		if (configProperties[i].id.equals("stream_id")) {
-    			sri.streamID = stream_id.getValue();
-    			sriUpdate = true;
-    		}
-    	}
+    /**
+     *
+     * Main processing function
+     *
+     * General functionality:
+     *
+     * The serviceFunction() is called repeatedly by the component's processing
+     * thread, which runs independently of the main thread. Each invocation
+     * should perform a single unit of work, such as reading and processing one
+     * data packet.
+     *
+     * The return status of serviceFunction() determines how soon the next
+     * invocation occurs:
+     *   - NORMAL: the next call happens immediately
+     *   - NOOP:   the next call happens after a pre-defined delay (100 ms)
+     *   - FINISH: no more calls occur
+     *
+     * StreamSRI:
+     *    To create a StreamSRI object, use the following code:
+     *            String stream_id = "testStream";
+     *            BULKIO.StreamSRI sri = new BULKIO.StreamSRI();
+     *            sri.mode = 0;
+     *            sri.xdelta = 0.0;
+     *            sri.ydelta = 1.0;
+     *            sri.subsize = 0;
+     *            sri.xunits = 1; // TIME_S
+     *            sri.streamID = (stream_id != null) ? stream_id : "";
+     *
+     * PrecisionUTCTime:
+     *    To create a PrecisionUTCTime object, use the following code:
+     *            BULKIO.PrecisionUTCTime tstamp = bulkio.time.utils.now();
+     *
+     * Ports:
+     *
+     *    Each port instance is accessed through members of the following form:
+     *
+     *        this.port_<PORT NAME>
+     *
+     *    Input BULKIO data is obtained by calling getPacket on the provides
+     *    port. The getPacket method takes one argument: the time to wait for
+     *    data to arrive, in milliseconds. A timeout of 0 causes getPacket to
+     *    return immediately, while a negative timeout indicates an indefinite
+     *    wait. If no data is queued and no packet arrives during the waiting
+     *    period, getPacket returns null.
+     *
+     *    Output BULKIO data is sent by calling pushPacket on the uses port. In
+     *    the case of numeric data, the pushPacket method takes a primitive
+     *    array (e.g., "float[]"), a timestamp, an end-of-stream flag and a
+     *    stream ID. You must make at least one call to pushSRI to associate a
+     *    StreamSRI with the stream ID before calling pushPacket, or receivers
+     *    may drop the data.
+     *
+     *    When all processing on a stream is complete, a call should be made to
+     *    pushPacket with the end-of-stream flag set to "true".
+     *
+     *    Interactions with non-BULKIO ports are left up to the discretion of
+     *    the component developer.
+     *
+     * Properties:
+     *
+     *    Properties are accessed through members of the same name; characters
+     *    that are invalid for a Java identifier are replaced with "_". The
+     *    current value of the property is read with getValue and written with
+     *    setValue:
+     *
+     *        float val = this.float_prop.getValue();
+     *        ...
+     *        this.float_prop.setValue(1.5f);
+     *
+     *    Primitive data types are stored using the corresponding Java object
+     *    wrapper class. For example, a property of type "float" is stored as a
+     *    Float. Java will automatically box and unbox primitive types where
+     *    appropriate.
+     *
+     *    Numeric properties support assignment via setValue from any numeric
+     *    type. The standard Java type coercion rules apply (e.g., truncation
+     *    of floating point values when converting to integer types).
+     *
+     * Example:
+     *
+     *    This example assumes that the component has two ports:
+     *        - A bulkio.InShortPort provides (input) port called dataShort_in
+     *        - A bulkio.InFloatPort uses (output) port called dataFloat_out
+     *    The mapping between the port and the class is found in the component
+     *    base class file.
+     *    This example also makes use of the following Properties:
+     *        - A float value called amplitude with a default value of 2.0
+     *        - A boolean called increaseAmplitude with a default value of true
+     *
+     *    InShortPort.Packet data = this.port_dataShort_in.getPacket(125);
+     *
+     *    if (data != null) {
+     *        float[] outData = new float[data.getData().length];
+     *        for (int i = 0; i < data.getData().length; i++) {
+     *            if (this.increaseAmplitude.getValue()) {
+     *                outData[i] = (float)data.getData()[i] * this.amplitude.getValue();
+     *            } else {
+     *                outData[i] = (float)data.getData()[i];
+     *            }
+     *        }
+     *
+     *        // NOTE: You must make at least one valid pushSRI call
+     *        if (data.sriChanged()) {
+     *            this.port_dataFloat_out.pushSRI(data.getSRI());
+     *        }
+     *        this.port_dataFloat_out.pushPacket(outData, data.getTime(), data.getEndOfStream(), data.getStreamID());
+     *    }
+     *
+     */
+    
+    protected int serviceFunction() {
+			/// If the transfer length has changed, reallocate the buffer
+			if (this.xfer_len.getValue() != data.length) {
+				data = new double[this.xfer_len.getValue()];
+				sriUpdate = true;
+			}
+
+			if (sriUpdate || (!hasSri(stream_id.getValue()))) {
+				sri.streamID=stream_id.getValue();
+				double xdelta = 1.0/this.sample_rate.getValue();				
+				if (xdelta!= sri.xdelta)
+				{
+					sri.xdelta = sample_time_delta;
+					sample_time_delta = (1.0/this.sample_rate.getValue());
+				}
+				this.port_out.pushSRI(sri);
+				sriUpdate = false;
+			}
+
+			delta_phase = this.frequency.getValue() * sample_time_delta;
+			delta_phase_offset = chirp * sample_time_delta * sample_time_delta;
+			if ((delta_phase < 0) && (!this.shape.getValue().equals("sine"))) {
+				delta_phase = -delta_phase;
+			}
+
+			// Generate the Waveform
+			if (this.shape.getValue().equals("sine")) {
+				Waveform.sincos(data, this.magnitude.getValue(), phase, delta_phase, data.length, 1);
+			} else if (this.shape.getValue().equals("square")) {
+				Waveform.square(data, this.magnitude.getValue(), phase, delta_phase, data.length, 1);
+			} else if (this.shape.getValue().equals("triangle")) {
+				Waveform.triangle(data, this.magnitude.getValue(), phase, delta_phase, data.length, 1);
+			} else if (this.shape.getValue().equals("sawtooth")) {
+				Waveform.sawtooth(data, this.magnitude.getValue(), phase, delta_phase, data.length, 1);
+			} else if (this.shape.getValue().equals("pulse")) {
+				Waveform.pulse(data, this.magnitude.getValue(), phase, delta_phase, data.length, 1);
+			} else if (this.shape.getValue().equals("constant")) {
+				Waveform.constant(data, this.magnitude.getValue(), data.length, 1);
+			} else if (this.shape.getValue().equals("whitenoise")) {
+				Waveform.whitenoise(data, this.magnitude.getValue(), data.length, 1);
+			} else if (this.shape.getValue().equals("lrs")) {
+				Waveform.lrs(data, this.magnitude.getValue(), data.length, 1, 1);
+			}
+
+			phase += delta_phase*this.xfer_len.getValue(); // increment phase
+			phase -= Math.floor(phase); // modulo 1.0
+
+			// Create a CPU time-stamp
+			long tmp_time = System.currentTimeMillis();
+			double wsec = tmp_time / 1000;
+			double fsec = (tmp_time % 1000) / 1000.;
+			PrecisionUTCTime tstamp = new PrecisionUTCTime(BULKIO.TCM_CPU.value, (short)1, (short)0, wsec, fsec);
+
+			// Push the data
+			this.port_out.pushPacket(data, 
+					tstamp, 
+					false, 
+					sri.streamID);
+
+			// If we are throttling, wait...otherwise run at full speed
+			if (this.throttle.getValue() == true) {
+				long wait_amt = (long)(this.xfer_len.getValue() * sample_time_delta * 1000);
+				try {
+					Thread.sleep(wait_amt);
+				} catch (InterruptedException e) {
+				}
+			}
+			return NOOP;
     }
-    //end-user-code
+
+    /**
+     * Set additional options for ORB startup. For example:
+     *
+     *   orbProps.put("com.sun.CORBA.giop.ORBFragmentSize", Integer.toString(fragSize));
+     *
+     * @param orbProps
+     */
+    public static void configureOrb(final Properties orbProps) {
+    }
 }

@@ -21,8 +21,10 @@
 
 #include "SigGen.h"
 
- int main(int argc, char* argv[])
+
+int main(int argc, char* argv[])
 {
     SigGen_i* SigGen_servant;
     Resource_impl::start_component(SigGen_servant, argc, argv);
+    return 0;
 }

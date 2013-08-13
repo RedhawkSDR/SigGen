@@ -19,10 +19,6 @@
 # AUTO-GENERATED CODE.  DO NOT MODIFY!
 #
 # Source: SigGen.spd.xml
-# Generated on: Fri Jul 05 15:49:50 EDT 2013
-# REDHAWK IDE
-# Version: 1.8.5
-# Build id: N201307031521
 from ossie.cf import CF, CF__POA
 from ossie.utils import uuid
 
@@ -31,10 +27,7 @@ from ossie.properties import simple_property
 
 import Queue, copy, time, threading
 from ossie.resource import usesport, providesport
-from ossie.cf import ExtendedCF
-from omniORB import CORBA
-import struct #@UnresolvedImport
-from bulkio.bulkioInterfaces import BULKIO, BULKIO__POA #@UnusedImport 
+import bulkio
 
 NOOP = -1
 NORMAL = 0
@@ -67,7 +60,7 @@ class SigGen_base(CF__POA.Resource, Resource):
         PAUSE = 0.0125 # The amount of time to sleep if process return NOOP
         TIMEOUT = 5.0 # The amount of time to wait for the process thread to die when stop() is called
         DEFAULT_QUEUE_SIZE = 100 # The number of BulkIO packets that can be in the queue before pushPacket will block
-        
+
         def __init__(self, identifier, execparams):
             loggerName = (execparams['NAME_BINDING'].replace('/', '.')).rsplit("_", 1)[0]
             Resource.__init__(self, identifier, execparams, loggerName=loggerName)
@@ -77,13 +70,12 @@ class SigGen_base(CF__POA.Resource, Resource):
             # with 1.7.X and 1.8.0 components.  This variable may be removed
             # in future releases
             self.auto_start = False
-            
+
         def initialize(self):
             Resource.initialize(self)
             
             # Instantiate the default implementations for all ports on this component
-
-            self.port_out = PortBULKIODataDoubleOut_i(self, "out")
+            self.port_out = bulkio.OutDoublePort("out")
 
         def start(self):
             self.threadControlLock.acquire()
@@ -132,296 +124,58 @@ class SigGen_base(CF__POA.Resource, Resource):
         # 
         # DO NOT ADD NEW PORTS HERE.  You can add ports in your derived class, in the SCD xml file, 
         # or via the IDE.
-        
-        def compareSRI(self, a, b):
-            if a.hversion != b.hversion:
-                return False
-            if a.xstart != b.xstart:
-                return False
-            if a.xdelta != b.xdelta:
-                return False
-            if a.xunits != b.xunits:
-                return False
-            if a.subsize != b.subsize:
-                return False
-            if a.ystart != b.ystart:
-                return False
-            if a.ydelta != b.ydelta:
-                return False
-            if a.yunits != b.yunits:
-                return False
-            if a.mode != b.mode:
-                return False
-            if a.streamID != b.streamID:
-                return False
-            if a.blocking != b.blocking:
-                return False
-            if len(a.keywords) != len(b.keywords):
-                return False
-            for keyA, keyB in zip(a.keywords, b.keywords):
-                if keyA.value._t != keyB.value._t:
-                    return False
-                if keyA.value._v != keyB.value._v:
-                    return False
-            return True
-
-
-        # 'BULKIO/dataDouble' port
-        class PortBULKIODataDoubleOut(BULKIO__POA.UsesPortStatisticsProvider):
-            """This class is a port template for the out port and
-            should not be instantiated nor modified.
-            
-            The expectation is that the specific port implementation will extend 
-            from this class instead of the base CORBA class CF__POA.Port.
-            """
-            pass
 
         port_out = usesport(name="out",
-                                            repid="IDL:BULKIO/dataDouble:1.0",
-                                            type_="data",)        
+                            repid="IDL:BULKIO/dataDouble:1.0",
+                            type_="data")
 
         ######################################################################
         # PROPERTIES
         # 
         # DO NOT ADD NEW PROPERTIES HERE.  You can add properties in your derived class, in the PRF xml file
-        # or by using the IDE.       
+        # or by using the IDE.
         frequency = simple_property(id_="frequency",
-                                          type_="double",
-                                          defvalue=1000,
-                                          units="Hz", 
-                                          mode="readwrite",
-                                          action="external",
-                                          kinds=("configure",)
-                                          )       
+                                    type_="double",
+                                    defvalue=1000.0,
+                                    mode="readwrite",
+                                    action="external",
+                                    kinds=("configure",)                                 )
         sample_rate = simple_property(id_="sample_rate",
-                                          type_="double",
-                                          defvalue=5000,
-                                          units="Hz", 
-                                          mode="readwrite",
-                                          action="external",
-                                          kinds=("configure",)
-                                          )       
+                                      type_="double",
+                                      defvalue=5000.0,
+                                      mode="readwrite",
+                                      action="external",
+                                      kinds=("configure",)                                 )
         magnitude = simple_property(id_="magnitude",
-                                          type_="double",
-                                          defvalue=1.0,
-                                          mode="readwrite",
-                                          action="external",
-                                          kinds=("configure",)
-                                          )       
+                                    type_="double",
+                                    defvalue=1.0,
+                                    mode="readwrite",
+                                    action="external",
+                                    kinds=("configure",)                                 )
         shape = simple_property(id_="shape",
-                                          type_="string",
-                                          defvalue="sine",
-                                          mode="readwrite",
-                                          action="external",
-                                          kinds=("configure",)
-                                          )       
+                                type_="string",
+                                defvalue="sine",
+                                mode="readwrite",
+                                action="external",
+                                kinds=("configure",)                                 )
         xfer_len = simple_property(id_="xfer_len",
-                                          type_="long",
-                                          defvalue=1000,
-                                          mode="readwrite",
-                                          action="external",
-                                          kinds=("configure",)
-                                          )       
+                                   type_="long",
+                                   defvalue=1000,
+                                   mode="readwrite",
+                                   action="external",
+                                   kinds=("configure",)                                 )
         throttle = simple_property(id_="throttle",
-                                          type_="boolean",
-                                          defvalue=True,
-                                          mode="readwrite",
-                                          action="external",
-                                          kinds=("configure",),
-                                          description="""Throttles the output data rate to approximately sample_rate""" 
-                                          )       
+                                   type_="boolean",
+                                   defvalue=True,
+                                   mode="readwrite",
+                                   action="external",
+                                   kinds=("configure",),
+                                   description="""Throttles the output data rate to approximately sample_rate"""
+                                   )
         stream_id = simple_property(id_="stream_id",
-                                          type_="string",
-                                          defvalue="SigGen Stream",
-                                          mode="readwrite",
-                                          action="external",
-                                          kinds=("configure",)
-                                          )
+                                    type_="string",
+                                    defvalue="SigGen Stream",
+                                    mode="readwrite",
+                                    action="external",
+                                    kinds=("configure",)                                 )
 
-'''uses port(s)'''
-
-
-class PortBULKIODataDoubleOut_i(SigGen_base.PortBULKIODataDoubleOut):
-    class linkStatistics:
-        class statPoint:
-            def __init__(self):
-                self.elements = 0
-                self.queueSize = 0.0
-                self.secs = 0.0
-                self.streamID = ""
-
-        def __init__(self, port_ref):
-            self.enabled = True
-            self.bitSize = struct.calcsize('d') * 8
-            self.historyWindow = 10
-            self.receivedStatistics = {}
-            self.port_ref = port_ref
-            self.receivedStatistics_idx = {}
-
-        def setEnabled(self, enableStats):
-            self.enabled = enableStats
-
-        def update(self, elementsReceived, queueSize, streamID, connectionId):
-            if not self.enabled:
-                return
-
-            if self.receivedStatistics.has_key(connectionId):
-                self.receivedStatistics[connectionId][self.receivedStatistics_idx[connectionId]].elements = elementsReceived
-                self.receivedStatistics[connectionId][self.receivedStatistics_idx[connectionId]].queueSize = queueSize
-                self.receivedStatistics[connectionId][self.receivedStatistics_idx[connectionId]].secs = time.time()
-                self.receivedStatistics[connectionId][self.receivedStatistics_idx[connectionId]].streamID = streamID
-                self.receivedStatistics_idx[connectionId] += 1
-                self.receivedStatistics_idx[connectionId] = self.receivedStatistics_idx[connectionId]%self.historyWindow
-            else:
-                self.receivedStatistics[connectionId] = []
-                self.receivedStatistics_idx[connectionId] = 0
-                for i in range(self.historyWindow):
-                    self.receivedStatistics[connectionId].append(self.statPoint())
-                self.receivedStatistics[connectionId][self.receivedStatistics_idx[connectionId]].elements = elementsReceived
-                self.receivedStatistics[connectionId][self.receivedStatistics_idx[connectionId]].queueSize = queueSize
-                self.receivedStatistics[connectionId][self.receivedStatistics_idx[connectionId]].secs = time.time()
-                self.receivedStatistics[connectionId][self.receivedStatistics_idx[connectionId]].streamID = streamID
-                self.receivedStatistics_idx[connectionId] += 1
-                self.receivedStatistics_idx[connectionId] = self.receivedStatistics_idx[connectionId] % self.historyWindow
-
-        def retrieve(self):
-            if not self.enabled:
-                return
-
-            retVal = []
-            for entry in self.receivedStatistics:
-                runningStats = BULKIO.PortStatistics(portName=self.port_ref.name,averageQueueDepth=-1,elementsPerSecond=-1,bitsPerSecond=-1,callsPerSecond=-1,streamIDs=[],timeSinceLastCall=-1,keywords=[])
-
-                listPtr = (self.receivedStatistics_idx[entry] + 1) % self.historyWindow    # don't count the first set of data, since we're looking at change in time rather than absolute time
-                frontTime = self.receivedStatistics[entry][(self.receivedStatistics_idx[entry] - 1) % self.historyWindow].secs
-                backTime = self.receivedStatistics[entry][self.receivedStatistics_idx[entry]].secs
-                totalData = 0.0
-                queueSize = 0.0
-                streamIDs = []
-                while (listPtr != self.receivedStatistics_idx[entry]):
-                    totalData += self.receivedStatistics[entry][listPtr].elements
-                    queueSize += self.receivedStatistics[entry][listPtr].queueSize
-                    streamIDptr = 0
-                    foundstreamID = False
-                    while (streamIDptr != len(streamIDs)):
-                        if (streamIDs[streamIDptr] == self.receivedStatistics[entry][listPtr].streamID):
-                            foundstreamID = True
-                            break
-                        streamIDptr += 1
-                    if (not foundstreamID):
-                        streamIDs.append(self.receivedStatistics[entry][listPtr].streamID)
-                    listPtr += 1
-                    listPtr = listPtr % self.historyWindow
-
-                currentTime = time.time()
-                totalTime = currentTime - backTime
-                if totalTime == 0:
-                    totalTime = 1e6
-                receivedSize = len(self.receivedStatistics[entry])
-                runningStats.bitsPerSecond = (totalData * self.bitSize) / totalTime
-                runningStats.elementsPerSecond = totalData/totalTime
-                runningStats.averageQueueDepth = queueSize / receivedSize
-                runningStats.callsPerSecond = float((receivedSize - 1)) / totalTime
-                runningStats.streamIDs = streamIDs
-                runningStats.timeSinceLastCall = currentTime - frontTime
-                usesPortStat = BULKIO.UsesPortStatistics(connectionId=entry, statistics=runningStats)
-                retVal.append(usesPortStat)
-            return retVal
-
-    def __init__(self, parent, name):
-        self.parent = parent
-        self.name = name
-        self.outConnections = {} # key=connectionId,  value=port
-        self.refreshSRI = False
-        self.stats = self.linkStatistics(self)
-        self.port_lock = threading.Lock()
-        self.sriDict = {} # key=streamID  value=StreamSRI
-
-    def connectPort(self, connection, connectionId):
-        self.port_lock.acquire()
-        try:
-            port = connection._narrow(BULKIO.dataDouble)
-            self.outConnections[str(connectionId)] = port
-            self.refreshSRI = True
-        finally:
-            self.port_lock.release()
-
-    def disconnectPort(self, connectionId):
-        self.port_lock.acquire()
-        try:
-            self.outConnections.pop(str(connectionId), None)
-        finally:
-            self.port_lock.release()
-
-    def enableStats(self, enabled):
-        self.stats.setEnabled(enabled)
-        
-    def _get_connections(self):
-        currentConnections = []
-        self.port_lock.acquire()
-        for id_, port in self.outConnections.items():
-            currentConnections.append(ExtendedCF.UsesConnection(id_, port))
-        self.port_lock.release()
-        return currentConnections
-
-    def _get_statistics(self):
-        self.port_lock.acquire()
-        recStat = self.stats.retrieve()
-        self.port_lock.release()
-        return recStat
-
-    def _get_state(self):
-        self.port_lock.acquire()
-        numberOutgoingConnections = len(self.outConnections)
-        self.port_lock.release()
-        if numberOutgoingConnections == 0:
-            return BULKIO.IDLE
-        else:
-            return BULKIO.ACTIVE
-        return BULKIO.BUSY
-
-    def _get_activeSRIs(self):
-        self.port_lock.acquire()
-        sris = []
-        for entry in self.sriDict:
-            sris.append(copy.deepcopy(self.sriDict[entry]))
-        self.port_lock.release()
-        return sris
-
-    def pushSRI(self, H):
-        self.port_lock.acquire()
-        self.sriDict[H.streamID] = copy.deepcopy(H)
-        try:
-            for connId, port in self.outConnections.items():
-                if port != None:
-                    try:
-                        port.pushSRI(H)
-                    except Exception:
-                        self.parent._log.exception("The call to pushSRI failed on port %s connection %s instance %s", self.name, connId, port)
-        finally:
-            self.refreshSRI = False
-            self.port_lock.release()
-
-    def pushPacket(self, data, T, EOS, streamID):
-        if self.refreshSRI:
-            if not self.sriDict.has_key(streamID):
-                sri = BULKIO.StreamSRI(1, 0.0, 1.0, BULKIO.UNITS_TIME, 0, 0.0, 0.0, BULKIO.UNITS_NONE, 0, streamID, True, []) 
-                self.sriDict[streamID] = copy.deepcopy(sri)
-            self.pushSRI(self.sriDict[streamID])
-
-        self.port_lock.acquire()
-
-        try:    
-            for connId, port in self.outConnections.items():
-                if port != None:
-                    try:
-                        port.pushPacket(data, T, EOS, streamID)
-                        self.stats.update(len(data), 0, streamID, connId)
-                    except Exception:
-                        self.parent._log.exception("The call to pushPacket failed on port %s connection %s instance %s", self.name, connId, port)
-            if EOS==True:
-                if self.sriDict.has_key(streamID):
-                    tmp = self.sriDict.pop(streamID)
-        finally:
-            self.port_lock.release()
- 

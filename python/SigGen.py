@@ -20,26 +20,26 @@
 # AUTO-GENERATED
 #
 # Source: SigGen.spd.xml
-# Generated on: Wed Feb 27 14:14:57 EST 2013
-# Redhawk IDE
-# Version:M.1.8.3
-# Build id: v201302191304
 from ossie.resource import Resource, start_component
-from ossie.utils import uuid
 import logging
-import Waveform
 import math
+from bulkio.bulkioInterfaces import BULKIO, BULKIO__POA 
+import Waveform
 
-from SigGen_base import * 
+from SigGen_base import *
 
 class SigGen_i(SigGen_base):
     """<DESCRIPTION GOES HERE>"""
     def initialize(self):
         """
         This is called by the framework immediately after your component registers with the NameService.
+        
+        In general, you should add customization here and not in the __init__ constructor.  If you have 
+        a custom port implementation you can override the specific implementation here with a statement
+        similar to the following:
+          self.some_port = MyPortImplementation()
         """
         SigGen_base.initialize(self)
-        
         self.last_xfer_len = self.xfer_len
         
         self.sri = BULKIO.StreamSRI(1, 0.0, 0.0, BULKIO.UNITS_TIME, 0, 0.0, 0.0, BULKIO.UNITS_NONE, 0, self.stream_id, False, [])
@@ -130,9 +130,10 @@ class SigGen_i(SigGen_base):
     def onconfigure_prop_stream_id(self, oldval, newval):
         self.stream_id = newval
         self.sri.streamID = self.stream_id
-        self.sriUpdate = True
+        self.sriUpdate = True        
   
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.WARN)
     logging.debug("Starting Component")
     start_component(SigGen_i)
+
