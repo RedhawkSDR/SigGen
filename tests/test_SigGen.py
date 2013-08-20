@@ -88,7 +88,7 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         ossie.utils.testing.ScaComponentTestCase.setUp(self)
         self.sink = test_utils.MyDataSink()
         #start all components
-        self.launch()
+        self.launch(initialize=True)
         self.comp.start()
         self.sink.start()
         #do the connections
