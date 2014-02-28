@@ -19,21 +19,21 @@ program.  If not, see http://www.gnu.org/licenses/.
 <!DOCTYPE properties PUBLIC "-//JTRS//DTD SCA V2.2.2 PRF//EN" "properties.dtd">
 <properties>
   <simple id="frequency" mode="readwrite" type="double">
-    <description>rate at which the perodic output waveforms repeat.  This value is ignored for aperiodic waveforms.</description>
+    <description>rate at which the periodic output waveforms repeat.  This value is ignored for aperiodic waveforms.</description>
     <value>1000</value>
     <units>Hz</units>
     <kind kindtype="configure"/>
     <action type="external"/>
   </simple>
   <simple id="sample_rate" mode="readwrite" type="double">
-    <description>sampling rate for ouptut data.</description>
+    <description>sampling rate for output data.</description>
     <value>5000</value>
     <units>Hz</units>
     <kind kindtype="configure"/>
     <action type="external"/>
   </simple>
   <simple id="magnitude" mode="readwrite" type="double">
-    <description>amplitdude of output data</description>
+    <description>amplitude of output data</description>
     <value>1.0</value>
     <kind kindtype="configure"/>
     <action type="external"/>

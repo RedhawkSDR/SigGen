@@ -22,7 +22,7 @@ program.  If not, see http://www.gnu.org/licenses/.
   <author>
     <name>null</name>
   </author>
-  <description>Signal Generator creates different output signals pending configutation.</description>
+  <description>Signal Generator creates different output signals based on its configuration. It contains an implementation in each of the supported languages (Python, C++, Java) as an example of component with multiple implementations.</description>
   <propertyfile type="PRF">
     <localfile name="SigGen.prf.xml"/>
   </propertyfile>
