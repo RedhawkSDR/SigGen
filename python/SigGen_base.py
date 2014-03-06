@@ -50,9 +50,11 @@ class ProcessThread(threading.Thread):
         state = NORMAL
         while (state != FINISH) and (not self.stop_signal.isSet()):
             state = self.target()
+            delay = 1e-6
             if (state == NOOP):
                 # If there was no data to process sleep to avoid spinning
-                time.sleep(self.pause)
+                delay = self.pause
+            time.sleep(delay)
 
 class SigGen_base(CF__POA.Resource, Resource):
         # These values can be altered in the __init__ of your derived class
@@ -66,7 +68,7 @@ class SigGen_base(CF__POA.Resource, Resource):
             Resource.__init__(self, identifier, execparams, loggerName=loggerName)
             self.threadControlLock = threading.RLock()
             self.process_thread = None
-            # self.auto_start is deprecated and is only kept for API compatability
+            # self.auto_start is deprecated and is only kept for API compatibility
             # with 1.7.X and 1.8.0 components.  This variable may be removed
             # in future releases
             self.auto_start = False
@@ -86,6 +88,7 @@ class SigGen_base(CF__POA.Resource, Resource):
                     self.process_thread.start()
             finally:
                 self.threadControlLock.release()
+
 
         def process(self):
             """The process method should process a single "chunk" of data and then return.  This method will be called
@@ -139,31 +142,41 @@ class SigGen_base(CF__POA.Resource, Resource):
                                     defvalue=1000.0,
                                     mode="readwrite",
                                     action="external",
-                                    kinds=("configure",)                                 )
+                                    kinds=("configure",),
+                                    description="""rate at which the periodic output waveforms repeat.  This value is ignored for aperiodic waveforms."""
+                                    )
         sample_rate = simple_property(id_="sample_rate",
                                       type_="double",
                                       defvalue=5000.0,
                                       mode="readwrite",
                                       action="external",
-                                      kinds=("configure",)                                 )
+                                      kinds=("configure",),
+                                      description="""sampling rate for output data."""
+                                      )
         magnitude = simple_property(id_="magnitude",
                                     type_="double",
                                     defvalue=1.0,
                                     mode="readwrite",
                                     action="external",
-                                    kinds=("configure",)                                 )
+                                    kinds=("configure",),
+                                    description="""amplitude of output data"""
+                                    )
         shape = simple_property(id_="shape",
                                 type_="string",
                                 defvalue="sine",
                                 mode="readwrite",
                                 action="external",
-                                kinds=("configure",)                                 )
+                                kinds=("configure",),
+                                description="""determine output data type"""
+                                )
         xfer_len = simple_property(id_="xfer_len",
                                    type_="long",
                                    defvalue=1000,
                                    mode="readwrite",
                                    action="external",
-                                   kinds=("configure",)                                 )
+                                   kinds=("configure",),
+                                   description="""number of samples of output data per output packet"""
+                                   )
         throttle = simple_property(id_="throttle",
                                    type_="boolean",
                                    defvalue=True,
@@ -177,5 +190,7 @@ class SigGen_base(CF__POA.Resource, Resource):
                                     defvalue="SigGen Stream",
                                     mode="readwrite",
                                     action="external",
-                                    kinds=("configure",)                                 )
+                                    kinds=("configure",),
+                                    description="""bulkio sri streamID for this data source."""
+                                    )
 

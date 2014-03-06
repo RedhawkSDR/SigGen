@@ -23,12 +23,14 @@ OSSIE_CHECK_OSSIE
 OSSIE_SDRROOT_AS_PREFIX
 
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig"
-PKG_CHECK_MODULES([OSSIE], [ossie >= 1.9])
+CLASSPATH_SOFTPKG_DEP=""
+AC_SUBST(CLASSPATH_SOFTPKG_DEP)
+PKG_CHECK_MODULES([OSSIE], [ossie >= 1.10])
 
 AC_CHECK_PROG([JAVAC], [javac], [javac], [AC_MSG_ERROR([cannot find Java compiler])])
 AC_CHECK_PROG([JAR], [jar], [jar], [AC_MSG_ERROR([cannot find jar program])])
 
-PKG_CHECK_MODULES([INTERFACEDEPS], [bulkio >= 1.0 bulkioInterfaces >= 1.9])
+PKG_CHECK_MODULES([INTERFACEDEPS], [bulkio >= 1.0 bulkioInterfaces >= 1.10])
 
 AC_CONFIG_FILES(Makefile)
 AC_OUTPUT

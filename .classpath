@@ -17,8 +17,8 @@ You should have received a copy of the GNU Lesser General Public License along w
 program.  If not, see http://www.gnu.org/licenses/.
 -->
 <classpath>
-	<classpathentry kind="con" path="gov.redhawk.ide.codegen.java.softPkgRef"/>
 	<classpathentry kind="src" output="java/bin" path="java/src"/>
+	<classpathentry kind="con" path="gov.redhawk.ide.codegen.java.softPkgRef"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="gov.redhawk.ide.codegen.java.ossieLib"/>
 	<classpathentry kind="output" path="bin"/>

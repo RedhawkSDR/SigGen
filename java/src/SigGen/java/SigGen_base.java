@@ -32,8 +32,6 @@ import CF.InvalidObjectReference;
 import org.ossie.component.*;
 import org.ossie.properties.*;
 
-import bulkio.*;
-
 /**
  * This is the component code. This file contains all the access points
  * you need to use to be able to access all input and output ports,
@@ -58,7 +56,7 @@ public abstract class SigGen_base extends Resource implements Runnable {
 
     /**
      * The property frequency
-     * If the meaning of this property isn't clear, a description should be added.
+     * rate at which the periodic output waveforms repeat.  This value is ignored for aperiodic waveforms.
      *
      * @generated
      */
@@ -74,7 +72,7 @@ public abstract class SigGen_base extends Resource implements Runnable {
 
     /**
      * The property sample_rate
-     * If the meaning of this property isn't clear, a description should be added.
+     * sampling rate for output data.
      *
      * @generated
      */
@@ -90,7 +88,7 @@ public abstract class SigGen_base extends Resource implements Runnable {
 
     /**
      * The property magnitude
-     * If the meaning of this property isn't clear, a description should be added.
+     * amplitude of output data
      *
      * @generated
      */
@@ -106,7 +104,7 @@ public abstract class SigGen_base extends Resource implements Runnable {
 
     /**
      * The property shape
-     * If the meaning of this property isn't clear, a description should be added.
+     * determine output data type
      *
      * @generated
      */
@@ -122,7 +120,7 @@ public abstract class SigGen_base extends Resource implements Runnable {
 
     /**
      * The property xfer_len
-     * If the meaning of this property isn't clear, a description should be added.
+     * number of samples of output data per output packet
      *
      * @generated
      */
@@ -146,7 +144,7 @@ public abstract class SigGen_base extends Resource implements Runnable {
         new BooleanProperty(
             "throttle", //id
             null, //name
-            null, //default value
+            true, //default value
             Mode.READWRITE, //mode
             Action.EXTERNAL, //action
             new Kind[] {Kind.CONFIGURE} //kind
@@ -154,7 +152,7 @@ public abstract class SigGen_base extends Resource implements Runnable {
 
     /**
      * The property stream_id
-     * If the meaning of this property isn't clear, a description should be added.
+     * bulkio sri streamID for this data source.
      *
      * @generated
      */
@@ -173,7 +171,9 @@ public abstract class SigGen_base extends Resource implements Runnable {
     /**
      * @generated
      */
-    public OutDoublePort port_out;
+    public bulkio.OutDoublePort port_out;
+
+
 
     /**
      * @generated
@@ -192,8 +192,18 @@ public abstract class SigGen_base extends Resource implements Runnable {
         // Provides/input
 
         // Uses/output
-        this.port_out = new OutDoublePort("out");
+        this.port_out = new bulkio.OutDoublePort("out");
         this.addPort("out", this.port_out);
+    }
+
+    public void start() throws CF.ResourcePackage.StartError
+    {
+        super.start();
+    }
+
+    public void stop() throws CF.ResourcePackage.StopError
+    {
+        super.stop();
     }
 
     public void run() 
