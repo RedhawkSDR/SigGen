@@ -24,8 +24,7 @@ import org.ossie.properties.PropertyListener;
 
 import BULKIO.PrecisionUTCTime;
 import BULKIO.StreamSRI;
-import CF.DataType;
-import CF.PropertySetPackage.InvalidConfiguration;
+import CF.ResourcePackage.StartError;
 
 /**
  * This is the component code. This file contains the derived class where custom
@@ -39,12 +38,12 @@ public class SigGen extends SigGen_base {
 	double[] data = new double[this.xfer_len.getValue()];
 	double phase = 0;
 	double chirp = 0;
-	double sample_time_delta;
 	double delta_phase;
 	double delta_phase_offset;
 	
 	private StreamSRI sri = new StreamSRI();
-    private boolean sriUpdate;
+	private volatile boolean sriUpdate;
+	private PrecisionUTCTime nextTime;
     
 	/**
      * This is the component constructor. In this method, you may add additional
@@ -82,40 +81,35 @@ public class SigGen extends SigGen_base {
         sri = new StreamSRI();
         sri.hversion = 1;
 		sri.mode = 0;
-		sri.xdelta = 0.0;
+		sri.xdelta = 1.0 / this.sample_rate.getValue();
 		sri.ydelta = 1.0;
 		sri.subsize = 0;
 		sri.xunits = 1; // TIME_S
 		sri.streamID = (this.stream_id.getValue() != null) ? this.stream_id.getValue() : "";
 		sriUpdate = true;
 		this.stream_id.addChangeListener(new PropertyListener<String>() {
-		                 public void valueChanged(String oldValue, String newValue) {
-		                     if (newValue !=null)
-		                	 stream_id.setValue(newValue);
-		                	 sriUpdate = true;
-		                 }
-		            });
-	
-		this.sample_rate.addChangeListener(new PropertyListener<Double>() {
-			public void valueChanged(Double newValue, Double oldValue) {
-				if (newValue >0)
-				{
-					sample_rate.setValue(newValue);
-					sriUpdate = true;
-				}
-				else
-				{
-					
-				}
+			public void valueChanged(String oldValue, String newValue) {
+				sriUpdate = true;
 			}
 		});
-		
+
+		this.sample_rate.addChangeListener(new PropertyListener<Double>() {
+			public void valueChanged(Double oldValue, Double newValue) {
+				sriUpdate = true;
+			}
+		});
     }
     
     public boolean hasSri(String streamID)
 	{
 		return Arrays.asList(port_out.activeSRIs()).contains(streamID);
 	}
+
+    @Override
+    public void start() throws StartError {
+        this.nextTime = bulkio.time.utils.now();
+        super.start();
+    }
 
     /**
      *
@@ -235,19 +229,14 @@ public class SigGen extends SigGen_base {
 			}
 
 			if (sriUpdate || (!hasSri(stream_id.getValue()))) {
-				sri.streamID=stream_id.getValue();
-				double xdelta = 1.0/this.sample_rate.getValue();				
-				if (xdelta!= sri.xdelta)
-				{
-					sri.xdelta = sample_time_delta;
-					sample_time_delta = (1.0/this.sample_rate.getValue());
-				}
-				this.port_out.pushSRI(sri);
 				sriUpdate = false;
+				sri.streamID = stream_id.getValue();
+				sri.xdelta = 1.0 / this.sample_rate.getValue();
+				this.port_out.pushSRI(sri);
 			}
 
-			delta_phase = this.frequency.getValue() * sample_time_delta;
-			delta_phase_offset = chirp * sample_time_delta * sample_time_delta;
+			delta_phase = this.frequency.getValue() * sri.xdelta;
+			delta_phase_offset = chirp * sri.xdelta * sri.xdelta;
 			if ((delta_phase < 0) && (!this.shape.getValue().equals("sine"))) {
 				delta_phase = -delta_phase;
 			}
@@ -271,30 +260,31 @@ public class SigGen extends SigGen_base {
 				Waveform.lrs(data, this.magnitude.getValue(), data.length, 1, 1);
 			}
 
-			phase += delta_phase*this.xfer_len.getValue(); // increment phase
+			phase += delta_phase*data.length; // increment phase
 			phase -= Math.floor(phase); // modulo 1.0
 
-			// Create a CPU time-stamp
-			long tmp_time = System.currentTimeMillis();
-			double wsec = tmp_time / 1000;
-			double fsec = (tmp_time % 1000) / 1000.;
-			PrecisionUTCTime tstamp = new PrecisionUTCTime(BULKIO.TCM_CPU.value, (short)1, (short)0, wsec, fsec);
-
 			// Push the data
-			this.port_out.pushPacket(data, 
-					tstamp, 
-					false, 
+			this.port_out.pushPacket(data,
+					this.nextTime,
+					false,
 					sri.streamID);
+
+			// Advance time
+			this.nextTime.tfsec += data.length * sri.xdelta;
+			if (this.nextTime.tfsec > 1.0) {
+				this.nextTime.tfsec -= 1.0;
+				this.nextTime.twsec += 1.0;
+			}
 
 			// If we are throttling, wait...otherwise run at full speed
 			if (this.throttle.getValue() == true) {
-				long wait_amt = (long)(this.xfer_len.getValue() * sample_time_delta * 1000);
+				long wait_amt = (long)(data.length * sri.xdelta * 1000);
 				try {
 					Thread.sleep(wait_amt);
 				} catch (InterruptedException e) {
 				}
 			}
-			return NOOP;
+			return NORMAL;
     }
 
     /**

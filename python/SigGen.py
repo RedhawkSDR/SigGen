@@ -52,6 +52,10 @@ class SigGen_i(SigGen_base):
         
         self._waveform = Waveform.Waveform()
 
+    def start(self):
+        self.next_time = bulkio.timestamp.now()
+        SigGen_base.start(self)
+
     def process(self):
         """
         Basic functionality:
@@ -86,40 +90,39 @@ class SigGen_i(SigGen_base):
         # Generate the Waveform
         data = []
         if self.shape == "sine":
-            data = self._waveform.sincos(self.magnitude, self.phase, self.delta_phase, self.xfer_len, 1)
+            data = self._waveform.sincos(self.magnitude, self.phase, self.delta_phase, self.last_xfer_len, 1)
         elif self.shape == "square":
-            data = self._waveform.square(self.magnitude, self.phase, self.delta_phase, self.xfer_len, 1)
+            data = self._waveform.square(self.magnitude, self.phase, self.delta_phase, self.last_xfer_len, 1)
         elif self.shape == "triangle":
-            data = self._waveform.triangle(self.magnitude, self.phase, self.delta_phase, self.xfer_len, 1)
+            data = self._waveform.triangle(self.magnitude, self.phase, self.delta_phase, self.last_xfer_len, 1)
         elif self.shape == "sawtooth":
-            data = self._waveform.sawtooth(self.magnitude, self.phase, self.delta_phase, self.xfer_len, 1)
+            data = self._waveform.sawtooth(self.magnitude, self.phase, self.delta_phase, self.last_xfer_len, 1)
         elif self.shape == "pulse":
-            data = self._waveform.pulse(self.magnitude, self.phase, self.delta_phase, self.xfer_len, 1)
+            data = self._waveform.pulse(self.magnitude, self.phase, self.delta_phase, self.last_xfer_len, 1)
         elif self.shape == "constant":
-            data = self._waveform.constant(self.magnitude, self.xfer_len, 1)
+            data = self._waveform.constant(self.magnitude, self.last_xfer_len, 1)
         elif self.shape == "whitenoise":
-            data = self._waveform.whitenoise(self.magnitude, self.xfer_len, 1)
+            data = self._waveform.whitenoise(self.magnitude, self.last_xfer_len, 1)
         elif self.shape == "lrs":
-            data = self._waveform.lrs(self.magnitude, self.xfer_len, 1, 1)
+            data = self._waveform.lrs(self.magnitude, self.last_xfer_len, 1, 1)
         else:
             return NOOP
   
-        self.phase += self.delta_phase*self.xfer_len # increment phase
+        self.phase += self.delta_phase*self.last_xfer_len # increment phase
         self.phase -= math.floor(self.phase) # module 1.0
         
-        # Create a CPU time-stamp
-        tmp_time = time.time()
-        wsec = math.modf(tmp_time)[1]
-        fsec = math.modf(tmp_time)[0]
-        
-        tstamp = BULKIO.PrecisionUTCTime(BULKIO.TCM_CPU, BULKIO.TCS_VALID, 0, wsec, fsec)
-        
         # Push the data
-        self.port_out.pushPacket(data, tstamp, False, self.stream_id)
+        self.port_out.pushPacket(data, self.next_time, False, self.stream_id)
+
+        # Advance time
+        self.next_time.tfsec += self.last_xfer_len * self.sri.xdelta
+        if self.next_time.tfsec > 1.0:
+            self.next_time.tfsec -= 1.0
+            self.next_time.twsec += 1.0
         
         # If we are throttling, wait...otherwise run at full speed
         if self.throttle:
-            wait_amt = self.xfer_len * self.sample_time_delta
+            wait_amt = self.last_xfer_len * self.sample_time_delta
             try:
                 time.sleep(wait_amt)
             finally:
