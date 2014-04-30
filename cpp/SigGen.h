@@ -30,6 +30,7 @@ class SigGen_i : public SigGen_base
         SigGen_i(const char *uuid, const char *label);
         ~SigGen_i();
         int serviceFunction();
+        void start() throw (CF::Resource::StartError, CORBA::SystemException);
 
     private:
         void streamIdChanged(const std::string& id);
@@ -43,7 +44,7 @@ class SigGen_i : public SigGen_base
     	long last_xfer_len;
     	BULKIO::StreamSRI sri;
     	bool sriUpdate;
-
+        BULKIO::PrecisionUTCTime nextTime;
 };
 
 #endif

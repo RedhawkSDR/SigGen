@@ -35,7 +35,7 @@ SigGen_i::SigGen_i(const char *uuid, const char *label) :
     SigGen_base(uuid, label)
 {
 	last_xfer_len = xfer_len;
-	data.resize(xfer_len);
+	data.resize(last_xfer_len);
 	phase = 0;
 	chirp = 0;
 
@@ -58,6 +58,14 @@ SigGen_i::SigGen_i(const char *uuid, const char *label) :
 
 SigGen_i::~SigGen_i()
 {
+}
+
+void SigGen_i::start() throw (CF::Resource::StartError, CORBA::SystemException) {
+	struct timeval tmp_time;
+	struct timezone tmp_tz;
+	gettimeofday(&tmp_time, &tmp_tz);
+	nextTime = bulkio::time::utils::create(tmp_time.tv_sec, tmp_time.tv_usec / 1e6);
+	SigGen_base::start();
 }
 
 /***********************************************************************************************
@@ -200,7 +208,7 @@ int SigGen_i::serviceFunction()
 
 	if ((xfer_len != last_xfer_len) || ((size_t) xfer_len != data.size())) {
 		last_xfer_len = xfer_len;
-		data.resize(xfer_len);
+		data.resize(last_xfer_len);
 		sriUpdate = true;
 	}
 
@@ -223,46 +231,39 @@ int SigGen_i::serviceFunction()
 
 	// Generate the Waveform
 	if (shape == "sine"){
-		Waveform::sincos(data, magnitude, phase, delta_phase, xfer_len, 1);
+		Waveform::sincos(data, magnitude, phase, delta_phase, last_xfer_len, 1);
 	} else if (shape == "square"){
-		Waveform::square(data, magnitude, phase, delta_phase, xfer_len, 1);
+		Waveform::square(data, magnitude, phase, delta_phase, last_xfer_len, 1);
 	} else if (shape == "triangle") {
-		Waveform::triangle(data, magnitude, phase, delta_phase, xfer_len, 1);
+		Waveform::triangle(data, magnitude, phase, delta_phase, last_xfer_len, 1);
 	} else if (shape == "sawtooth") {
-		Waveform::sawtooth(data, magnitude, phase, delta_phase, xfer_len, 1);
+		Waveform::sawtooth(data, magnitude, phase, delta_phase, last_xfer_len, 1);
 	} else if (shape == "pulse") {
-		Waveform::pulse(data, magnitude, phase, delta_phase, xfer_len, 1);
+		Waveform::pulse(data, magnitude, phase, delta_phase, last_xfer_len, 1);
 	} else if (shape == "constant") {
-		Waveform::constant(data, magnitude, xfer_len, 1);
+		Waveform::constant(data, magnitude, last_xfer_len, 1);
 	} else if (shape == "whitenoise") {
-		Waveform::whitenoise(data, magnitude, xfer_len, 1);
+		Waveform::whitenoise(data, magnitude, last_xfer_len, 1);
 	} else if (shape == "lrs") {
-		Waveform::lrs(data, magnitude, xfer_len, 1, 1);
+		Waveform::lrs(data, magnitude, last_xfer_len, 1, 1);
 	}
 
-	phase += delta_phase*xfer_len; // increment phase
+	phase += delta_phase * last_xfer_len; // increment phase
 	phase -= floor(phase); // modulo 1.0
 
-	struct timeval tmp_time;
-	struct timezone tmp_tz;
-	gettimeofday(&tmp_time, &tmp_tz);
-	double wsec = tmp_time.tv_sec;
-	double fsec = tmp_time.tv_usec / 1e6;;
-	//std::cout << "time: " << wsec << " microseconds: " << fsec << std::endl;
-
-	BULKIO::PrecisionUTCTime tstamp = BULKIO::PrecisionUTCTime();
-	tstamp.tcmode = BULKIO::TCM_CPU;
-	tstamp.tcstatus = (short)1;
-	tstamp.toff = 0.0;
-	tstamp.twsec = wsec;
-	tstamp.tfsec = fsec;
-
 	// Push the data
-	out->pushPacket(data, tstamp, false, stream_id);
+	out->pushPacket(data, nextTime, false, stream_id);
+
+	// Advance time
+	nextTime.tfsec += last_xfer_len * sri.xdelta;
+	if (nextTime.tfsec > 1.0) {
+		nextTime.tfsec -= 1.0;
+		nextTime.twsec += 1.0;
+	}
 
 	// If we are throttling, wait...otherwise run at full speed
 	if (throttle == true) {
-		long wait_amt_usec = (long)(xfer_len * sample_time_delta * 1000000.0);
+		long wait_amt_usec = (long)(last_xfer_len * sample_time_delta * 1000000.0);
 		try {
 			usleep(wait_amt_usec);
 		} catch (...) {
