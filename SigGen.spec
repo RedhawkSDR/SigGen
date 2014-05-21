@@ -46,6 +46,8 @@ Requires:       bulkioInterfaces
 
 %description
 Component %{name}
+ * Commit: __REVISION__
+ * Source Date/Time: __DATETIME__
 
 
 %prep
