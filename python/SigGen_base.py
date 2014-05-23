@@ -16,47 +16,23 @@
 # You should have received a copy of the GNU Lesser General Public License along with this 
 # program.  If not, see http://www.gnu.org/licenses/.
 #
+#
 # AUTO-GENERATED CODE.  DO NOT MODIFY!
 #
 # Source: SigGen.spd.xml
-from ossie.cf import CF, CF__POA
+from ossie.cf import CF
+from ossie.cf import CF__POA
 from ossie.utils import uuid
 
 from ossie.resource import Resource
+from ossie.threadedcomponent import *
 from ossie.properties import simple_property
 
 import Queue, copy, time, threading
 from ossie.resource import usesport, providesport
 import bulkio
 
-NOOP = -1
-NORMAL = 0
-FINISH = 1
-class ProcessThread(threading.Thread):
-    def __init__(self, target, pause=0.0125):
-        threading.Thread.__init__(self)
-        self.setDaemon(True)
-        self.target = target
-        self.pause = pause
-        self.stop_signal = threading.Event()
-
-    def stop(self):
-        self.stop_signal.set()
-
-    def updatePause(self, pause):
-        self.pause = pause
-
-    def run(self):
-        state = NORMAL
-        while (state != FINISH) and (not self.stop_signal.isSet()):
-            state = self.target()
-            delay = 1e-6
-            if (state == NOOP):
-                # If there was no data to process sleep to avoid spinning
-                delay = self.pause
-            time.sleep(delay)
-
-class SigGen_base(CF__POA.Resource, Resource):
+class SigGen_base(CF__POA.Resource, Resource, ThreadedComponent):
         # These values can be altered in the __init__ of your derived class
 
         PAUSE = 0.0125 # The amount of time to sleep if process return NOOP
@@ -66,61 +42,30 @@ class SigGen_base(CF__POA.Resource, Resource):
         def __init__(self, identifier, execparams):
             loggerName = (execparams['NAME_BINDING'].replace('/', '.')).rsplit("_", 1)[0]
             Resource.__init__(self, identifier, execparams, loggerName=loggerName)
-            self.threadControlLock = threading.RLock()
-            self.process_thread = None
+            ThreadedComponent.__init__(self)
+
             # self.auto_start is deprecated and is only kept for API compatibility
             # with 1.7.X and 1.8.0 components.  This variable may be removed
             # in future releases
             self.auto_start = False
-
-        def initialize(self):
-            Resource.initialize(self)
-            
             # Instantiate the default implementations for all ports on this component
             self.port_out = bulkio.OutDoublePort("out")
 
         def start(self):
-            self.threadControlLock.acquire()
-            try:
-                Resource.start(self)
-                if self.process_thread == None:
-                    self.process_thread = ProcessThread(target=self.process, pause=self.PAUSE)
-                    self.process_thread.start()
-            finally:
-                self.threadControlLock.release()
-
-
-        def process(self):
-            """The process method should process a single "chunk" of data and then return.  This method will be called
-            from the processing thread again, and again, and again until it returns FINISH or stop() is called on the
-            component.  If no work is performed, then return NOOP"""
-            raise NotImplementedError
+            Resource.start(self)
+            ThreadedComponent.startThread(self, pause=self.PAUSE)
 
         def stop(self):
-            self.threadControlLock.acquire()
-            try:
-                process_thread = self.process_thread
-                self.process_thread = None
-
-                if process_thread != None:
-                    process_thread.stop()
-                    process_thread.join(self.TIMEOUT)
-                    if process_thread.isAlive():
-                        raise CF.Resource.StopError(CF.CF_NOTSET, "Processing thread did not die")
-                Resource.stop(self)
-            finally:
-                self.threadControlLock.release()
+            if not ThreadedComponent.stopThread(self, self.TIMEOUT):
+                raise CF.Resource.StopError(CF.CF_NOTSET, "Processing thread did not die")
+            Resource.stop(self)
 
         def releaseObject(self):
             try:
                 self.stop()
             except Exception:
                 self._log.exception("Error stopping")
-            self.threadControlLock.acquire()
-            try:
-                Resource.releaseObject(self)
-            finally:
-                self.threadControlLock.release()
+            Resource.releaseObject(self)
 
         ######################################################################
         # PORTS
@@ -143,54 +88,54 @@ class SigGen_base(CF__POA.Resource, Resource):
                                     mode="readwrite",
                                     action="external",
                                     kinds=("configure",),
-                                    description="""rate at which the periodic output waveforms repeat.  This value is ignored for aperiodic waveforms."""
-                                    )
+                                    description="""rate at which the periodic output waveforms repeat.  This value is ignored for aperiodic waveforms.""")
+        
         sample_rate = simple_property(id_="sample_rate",
                                       type_="double",
                                       defvalue=5000.0,
                                       mode="readwrite",
                                       action="external",
                                       kinds=("configure",),
-                                      description="""sampling rate for output data."""
-                                      )
+                                      description="""sampling rate for output data.""")
+        
         magnitude = simple_property(id_="magnitude",
                                     type_="double",
                                     defvalue=1.0,
                                     mode="readwrite",
                                     action="external",
                                     kinds=("configure",),
-                                    description="""amplitude of output data"""
-                                    )
+                                    description="""amplitude of output data""")
+        
         shape = simple_property(id_="shape",
                                 type_="string",
                                 defvalue="sine",
                                 mode="readwrite",
                                 action="external",
                                 kinds=("configure",),
-                                description="""determine output data type"""
-                                )
+                                description="""determine output data type""")
+        
         xfer_len = simple_property(id_="xfer_len",
                                    type_="long",
                                    defvalue=1000,
                                    mode="readwrite",
                                    action="external",
                                    kinds=("configure",),
-                                   description="""number of samples of output data per output packet"""
-                                   )
+                                   description="""number of samples of output data per output packet""")
+        
         throttle = simple_property(id_="throttle",
                                    type_="boolean",
                                    defvalue=True,
                                    mode="readwrite",
                                    action="external",
                                    kinds=("configure",),
-                                   description="""Throttles the output data rate to approximately sample_rate"""
-                                   )
+                                   description="""Throttles the output data rate to approximately sample_rate""")
+        
         stream_id = simple_property(id_="stream_id",
                                     type_="string",
                                     defvalue="SigGen Stream",
                                     mode="readwrite",
                                     action="external",
                                     kinds=("configure",),
-                                    description="""bulkio sri streamID for this data source."""
-                                    )
+                                    description="""bulkio sri streamID for this data source.""")
+        
 

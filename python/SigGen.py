@@ -52,6 +52,8 @@ class SigGen_i(SigGen_base):
         
         self._waveform = Waveform.Waveform()
 
+        self.addPropertyChangeListener("streamid", self.propChange_stream_id)
+
     def start(self):
         self.next_time = bulkio.timestamp.now()
         SigGen_base.start(self)
@@ -130,8 +132,7 @@ class SigGen_i(SigGen_base):
             
         return NORMAL
     
-    def onconfigure_prop_stream_id(self, oldval, newval):
-        self.stream_id = newval
+    def propChange_stream_id(self, id, oldval, newval):
         self.sri.streamID = self.stream_id
         self.sriUpdate = True        
   
