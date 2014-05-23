@@ -52,7 +52,7 @@ SigGen_i::SigGen_i(const char *uuid, const char *label) :
 	sri.streamID = this->stream_id.c_str();
 	sriUpdate = true;
 
-	setPropertyChangeListener("stream_id", this, &SigGen_i::streamIdChanged);
+	addPropertyChangeListener("stream_id", this, &SigGen_i::stream_idChanged);
 }
 
 
@@ -201,6 +201,7 @@ void SigGen_i::start() throw (CF::Resource::StartError, CORBA::SystemException) 
 ************************************************************************************************/
 int SigGen_i::serviceFunction()
 {
+	boost::mutex::scoped_lock lock(sigGenLock_);
 	if (stream_id.empty()){
 		stream_id = "";
 		sri.streamID = stream_id.c_str();
@@ -274,8 +275,14 @@ int SigGen_i::serviceFunction()
 	return NORMAL;
 }
 
-void SigGen_i::streamIdChanged(const std::string& id){
-	sri.streamID = stream_id.c_str();
-	sriUpdate = true;
-}
+// Property Change Listeners
 
+void SigGen_i::stream_idChanged(const std::string *oldValue, const std::string *newValue)
+{
+	if (*oldValue != *newValue) {
+		boost::mutex::scoped_lock lock(sigGenLock_);
+		stream_id = *newValue;
+		sri.streamID = stream_id.c_str();
+		sriUpdate = true;
+	}
+}

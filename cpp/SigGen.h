@@ -33,7 +33,9 @@ class SigGen_i : public SigGen_base
         void start() throw (CF::Resource::StartError, CORBA::SystemException);
 
     private:
-        void streamIdChanged(const std::string& id);
+        boost::mutex sigGenLock_;
+
+        void stream_idChanged(const std::string *oldValue, const std::string *newValue);
 
     	std::vector<double> data;
     	double phase;
