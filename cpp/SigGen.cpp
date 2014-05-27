@@ -281,7 +281,6 @@ void SigGen_i::stream_idChanged(const std::string *oldValue, const std::string *
 {
 	if (*oldValue != *newValue) {
 		boost::mutex::scoped_lock lock(sigGenLock_);
-		stream_id = *newValue;
 		sri.streamID = stream_id.c_str();
 		sriUpdate = true;
 	}

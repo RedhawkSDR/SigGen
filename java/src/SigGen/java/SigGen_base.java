@@ -41,18 +41,11 @@ import org.ossie.properties.*;
  *
  * @generated
  */
-public abstract class SigGen_base extends Resource implements Runnable {
+public abstract class SigGen_base extends ThreadedResource {
     /**
      * @generated
      */
     public final static Logger logger = Logger.getLogger(SigGen_base.class.getName());
-
-    /**
-     * Return values for service function.
-     */
-    public final static int FINISH = -1;
-    public final static int NOOP   = 0;
-    public final static int NORMAL = 1;
 
     /**
      * The property frequency
@@ -69,7 +62,7 @@ public abstract class SigGen_base extends Resource implements Runnable {
             Action.EXTERNAL, //action
             new Kind[] {Kind.CONFIGURE} //kind
             );
-
+    
     /**
      * The property sample_rate
      * sampling rate for output data.
@@ -85,7 +78,7 @@ public abstract class SigGen_base extends Resource implements Runnable {
             Action.EXTERNAL, //action
             new Kind[] {Kind.CONFIGURE} //kind
             );
-
+    
     /**
      * The property magnitude
      * amplitude of output data
@@ -101,7 +94,7 @@ public abstract class SigGen_base extends Resource implements Runnable {
             Action.EXTERNAL, //action
             new Kind[] {Kind.CONFIGURE} //kind
             );
-
+    
     /**
      * The property shape
      * determine output data type
@@ -117,7 +110,7 @@ public abstract class SigGen_base extends Resource implements Runnable {
             Action.EXTERNAL, //action
             new Kind[] {Kind.CONFIGURE} //kind
             );
-
+    
     /**
      * The property xfer_len
      * number of samples of output data per output packet
@@ -133,7 +126,7 @@ public abstract class SigGen_base extends Resource implements Runnable {
             Action.EXTERNAL, //action
             new Kind[] {Kind.CONFIGURE} //kind
             );
-
+    
     /**
      * The property throttle
      * Throttles the output data rate to approximately sample_rate
@@ -149,7 +142,7 @@ public abstract class SigGen_base extends Resource implements Runnable {
             Action.EXTERNAL, //action
             new Kind[] {Kind.CONFIGURE} //kind
             );
-
+    
     /**
      * The property stream_id
      * bulkio sri streamID for this data source.
@@ -165,15 +158,12 @@ public abstract class SigGen_base extends Resource implements Runnable {
             Action.EXTERNAL, //action
             new Kind[] {Kind.CONFIGURE} //kind
             );
-
-    // Provides/inputs
+    
     // Uses/outputs
     /**
      * @generated
      */
     public bulkio.OutDoublePort port_out;
-
-
 
     /**
      * @generated
@@ -181,6 +171,8 @@ public abstract class SigGen_base extends Resource implements Runnable {
     public SigGen_base()
     {
         super();
+
+        // Properties
         addProperty(frequency);
         addProperty(sample_rate);
         addProperty(magnitude);
@@ -189,9 +181,7 @@ public abstract class SigGen_base extends Resource implements Runnable {
         addProperty(throttle);
         addProperty(stream_id);
 
-        // Provides/input
-
-        // Uses/output
+        // Uses/outputs
         this.port_out = new bulkio.OutDoublePort("out");
         this.addPort("out", this.port_out);
     }
@@ -205,25 +195,6 @@ public abstract class SigGen_base extends Resource implements Runnable {
     {
         super.stop();
     }
-
-    public void run() 
-    {
-        while(this.started())
-        {
-            int state = this.serviceFunction();
-            if (state == NOOP) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    break;
-                }
-            } else if (state == FINISH) {
-                return;
-            }
-        }
-    }
-
-    protected abstract int serviceFunction();
 
     /**
      * The main function of your component.  If no args are provided, then the
@@ -239,7 +210,7 @@ public abstract class SigGen_base extends Resource implements Runnable {
         SigGen.configureOrb(orbProps);
 
         try {
-            Resource.start_component(SigGen.class, args, orbProps);
+            ThreadedResource.start_component(SigGen.class, args, orbProps);
         } catch (InvalidObjectReference e) {
             e.printStackTrace();
         } catch (NotFound e) {
