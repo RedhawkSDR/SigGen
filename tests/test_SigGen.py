@@ -291,6 +291,70 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
             self.assertEqual(len(p.data), n_expected)
             for rx_val, exp_val in zip(p.data, expected_values):
                 self.assertEqual(rx_val, exp_val)
+                
+    def test_push_sri(self):
+        print "\n...Starting Test push sri"
+        self._generate_config()
+        
+        self.config_params.pop("stream_id")
+        self.comp_obj.configure(props_from_dict(self.config_params))
+        time.sleep(1.) # Ensure SigGen is sending out the desired signal before continuing
+        start_time = time.time()
+        rx_len_sec= 1. # Get 1s worth of data
+        rx_data = self._get_received_data(start_time, rx_len_sec)
+        print "\nReceived Data Time Range:"
+        print rx_data[0].T
+        print rx_data[-1].T
+        
+        for p in rx_data:
+            self.assertAlmostEqual(self.config_params["sample_rate"], 1 / p.sri.xdelta)
+            
+    def test_no_configure(self):
+        print "\n...Starting Test no configure"
+        
+        time.sleep(1.)
+        start_time = time.time()
+        rx_len_sec = 1. 
+        rx_data = self._get_received_data(start_time, rx_len_sec)
+        print "\nReceived Data Time Range:"
+        print rx_data[0].T
+        print rx_data[-1].T
+        
+        delta_phase = self.comp.frequency / self.comp.sample_rate
+        expected_values = self.waveforms.generate_sine(self.comp.magnitude, self.comp.xfer_len, dp=delta_phase )
+        n_expected = len(expected_values)
+        for p in rx_data:
+            # Data returned is list of test_utils.BufferedPacket
+            self.assertEqual(len(p.data), n_expected)
+            for rx_val, exp_val in zip(p.data, expected_values):
+                self.assertEqual(rx_val, exp_val)
+                
+    def test_frequency(self):
+        print "\n...Starting Test frequency"
+        self._generate_config()
+        
+        self.comp_obj.configure(props_from_dict(self.config_params))
+        time.sleep(1.)
+        start_time = time.time()
+        rx_len_sec = 1. 
+        rx_data = self._get_received_data(start_time, rx_len_sec)
+        print "\nReceived Data Time Range:"
+        print rx_data[0].T
+        print rx_data[-1].T
+        
+        zero_crossings = 0
+        expected_zero_crossings = 2 * self.config_params["frequency"] * self.config_params["xfer_len"] / self.config_params["sample_rate"] # 2 * (zc/s /2) * (S/packet) / (S/s) = zc
+        
+        data = rx_data[0].data
+        
+        for i, x in enumerate(data):
+            if i == (len(data)-1):
+                break
+            
+            if (x <= 0 and data[i+1] > 0) or (x >= 0 and data[i+1] < 0):
+                zero_crossings += 1
+                
+        self.assertEqual(zero_crossings, expected_zero_crossings)
     
 if __name__ == "__main__":
     ossie.utils.testing.main("../SigGen.spd.xml") # By default tests all implementations
