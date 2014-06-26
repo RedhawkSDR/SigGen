@@ -33,7 +33,7 @@ Release:        1%{?dist}
 Summary:        Component %{name}
 
 Group:          REDHAWK/Components
-License:        None
+License:        LGPLv3+
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
