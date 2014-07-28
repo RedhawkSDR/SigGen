@@ -29,7 +29,7 @@ Prefix:         %{_prefix}
 
 Name:           SigGen
 Version:        1.0.0
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        Component %{name}
 
 Group:          REDHAWK/Components
