@@ -16,7 +16,7 @@
 # program.  If not, see http://www.gnu.org/licenses/.
 #
 
-AC_INIT(SigGen, 1.0.0)
+AC_INIT(SigGen, 1.0.1)
 AM_INIT_AUTOMAKE(nostdinc)
 
 AC_PROG_INSTALL

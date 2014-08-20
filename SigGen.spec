@@ -28,8 +28,8 @@ Prefix:         %{_prefix}
 %define _infodir       %{_prefix}/info
 
 Name:           SigGen
-Version:        1.0.0
-Release:        10%{?dist}
+Version:        1.0.1
+Release:        1%{?dist}
 Summary:        Component %{name}
 
 Group:          REDHAWK/Components
