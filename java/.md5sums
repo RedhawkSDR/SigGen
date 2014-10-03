@@ -1,0 +1,5 @@
+0ddba56fcfb08cc94b62173460934785  src/SigGen/java/SigGen_base.java
+ae3f2aee7c304242e8a182a84e30a23f  configure.ac
+37fea35398d44dc8deb627e7bccf9d96  Makefile.am
+2c12f10ac6d2ac36662ca1f9ff9e5eb3  startJava.sh
+c99df9fa4ab0cd042eac42fcee6441c3  reconf

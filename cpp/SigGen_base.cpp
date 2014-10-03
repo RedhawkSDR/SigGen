@@ -138,6 +138,24 @@ void SigGen_base::loadProperties()
                 "external",
                 "configure");
 
+    addProperty(chan_rf,
+                -1,
+                "chan_rf",
+                "",
+                "readwrite",
+                "Hz",
+                "external",
+                "configure");
+
+    addProperty(col_rf,
+                -1,
+                "col_rf",
+                "",
+                "readwrite",
+                "Hz",
+                "external",
+                "configure");
+
 }
 
 

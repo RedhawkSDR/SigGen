@@ -15,7 +15,8 @@
 # You should have received a copy of the GNU Lesser General Public License along with this 
 # program.  If not, see http://www.gnu.org/licenses/.
 #
-AC_INIT(SigGen, 1.0.1)
+
+AC_INIT(SigGen, 1.1.0)
 AM_INIT_AUTOMAKE(nostdinc)
 
 AC_PROG_CC
@@ -31,7 +32,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 # Dependencies
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig"
 PKG_CHECK_MODULES([PROJECTDEPS], [ossie >= 1.10 omniORB4 >= 4.1.0  ])
-PKG_CHECK_MODULES([INTERFACEDEPS], [bulkio >= 1.0 bulkioInterfaces >= 1.10])
+PKG_CHECK_MODULES([INTERFACEDEPS], [bulkio >= 1.10])
 OSSIE_ENABLE_LOG4CXX
 AX_BOOST_BASE([1.41])
 AX_BOOST_SYSTEM

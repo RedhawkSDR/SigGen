@@ -16,7 +16,7 @@
 # program.  If not, see http://www.gnu.org/licenses/.
 #
 
-AC_INIT(SigGen, 1.0.1)
+AC_INIT(SigGen, 1.1.0)
 AM_INIT_AUTOMAKE(nostdinc)
 
 AC_PROG_INSTALL
@@ -31,8 +31,8 @@ AC_CHECK_PYMODULE(ossie, [], [AC_MSG_ERROR([the python ossie module is required]
 PKG_CHECK_MODULES([OMNIORB], [omniORB4 >= 4.1.0])
 AC_CHECK_PYMODULE(omniORB, [], [AC_MSG_ERROR([the python omniORB module is required])])
 
-PKG_CHECK_MODULES(bulkioInterfaces, bulkioInterfaces >= 1.10) 
-AC_CHECK_PYMODULE(bulkio.bulkioInterfaces, [], [AC_MSG_ERROR([the python bulkio.bulkioInterfaces module is required])])
+PKG_CHECK_MODULES(bulkio, bulkio >= 1.10) 
+AC_CHECK_PYMODULE(bulkio, [], [AC_MSG_ERROR([the python bulkio module is required])])
 
 AC_CONFIG_FILES(Makefile)
 

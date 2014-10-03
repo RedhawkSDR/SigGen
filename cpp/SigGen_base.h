@@ -47,6 +47,8 @@ class SigGen_base : public Resource_impl, protected ThreadedComponent
         CORBA::Long xfer_len;
         bool throttle;
         std::string stream_id;
+        double chan_rf;
+        double col_rf;
 
         // Ports
         bulkio::OutDoublePort *out;

@@ -159,6 +159,38 @@ public abstract class SigGen_base extends ThreadedResource {
             new Kind[] {Kind.CONFIGURE} //kind
             );
     
+    /**
+     * The property chan_rf
+     * Sets the CHAN_RF SRI keyword. Set to -1 if not desired.
+     *
+     * @generated
+     */
+    public final DoubleProperty chan_rf =
+        new DoubleProperty(
+            "chan_rf", //id
+            null, //name
+            -1.0, //default value
+            Mode.READWRITE, //mode
+            Action.EXTERNAL, //action
+            new Kind[] {Kind.CONFIGURE} //kind
+            );
+    
+    /**
+     * The property col_rf
+     * Sets the COL_RF SRI keyword. Set to -1 if not desired.
+     *
+     * @generated
+     */
+    public final DoubleProperty col_rf =
+        new DoubleProperty(
+            "col_rf", //id
+            null, //name
+            -1.0, //default value
+            Mode.READWRITE, //mode
+            Action.EXTERNAL, //action
+            new Kind[] {Kind.CONFIGURE} //kind
+            );
+    
     // Uses/outputs
     /**
      * @generated
@@ -180,6 +212,8 @@ public abstract class SigGen_base extends ThreadedResource {
         addProperty(xfer_len);
         addProperty(throttle);
         addProperty(stream_id);
+        addProperty(chan_rf);
+        addProperty(col_rf);
 
         // Uses/outputs
         this.port_out = new bulkio.OutDoublePort("out");

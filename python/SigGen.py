@@ -25,6 +25,7 @@ import logging
 import math
 from bulkio.bulkioInterfaces import BULKIO, BULKIO__POA 
 import Waveform
+from omniORB import any
 
 from SigGen_base import *
 
@@ -42,7 +43,12 @@ class SigGen_i(SigGen_base):
         SigGen_base.initialize(self)
         self.last_xfer_len = self.xfer_len
         
-        self.sri = BULKIO.StreamSRI(1, 0.0, 0.0, BULKIO.UNITS_TIME, 0, 0.0, 0.0, BULKIO.UNITS_NONE, 0, self.stream_id, False, [])
+        keywords = []
+        if self.chan_rf != -1:
+            keywords.append(CF.DataType('CHAN_RF', any.to_any(self.chan_rf)))
+        if self.col_rf != -1:
+            keywords.append(CF.DataType('COL_RF', any.to_any(self.col_rf)))
+        self.sri = BULKIO.StreamSRI(1, 0.0, 0.0, BULKIO.UNITS_TIME, 0, 0.0, 0.0, BULKIO.UNITS_NONE, 0, self.stream_id, False, keywords)
         self.sriUpdate = True
         self.phase = 0
         self.chirp = 0
@@ -52,7 +58,10 @@ class SigGen_i(SigGen_base):
         
         self._waveform = Waveform.Waveform()
 
-        self.addPropertyChangeListener("streamid", self.propChange_stream_id)
+        # Separate listeners required. Bug fixed in CF 1.10.1
+        self.addPropertyChangeListener("streamid", self.prop_update_sri)
+        self.addPropertyChangeListener("chan_rf", self.prop_update_sri2)
+        self.addPropertyChangeListener("col_rf", self.prop_update_sri3)
 
     def start(self):
         self.next_time = bulkio.timestamp.now()
@@ -81,8 +90,14 @@ class SigGen_i(SigGen_base):
             self.sriUpdate = True
             
         if self.sriUpdate or not self.port_out.sriDict.has_key(self.stream_id):
-            self.port_out.pushSRI(self.sri)
             self.sriUpdate = False
+            keywords = []
+            if self.chan_rf != -1:
+                keywords.append(CF.DataType('CHAN_RF', any.to_any(self.chan_rf)))
+            if self.col_rf != -1:
+                keywords.append(CF.DataType('COL_RF', any.to_any(self.col_rf)))
+            self.sri.keywords = keywords
+            self.port_out.pushSRI(self.sri)
             
         self.delta_phase = self.frequency * self.sample_time_delta
         self.delta_phase_offset = self.chirp * self.sample_time_delta * self.sample_time_delta
@@ -132,10 +147,15 @@ class SigGen_i(SigGen_base):
             
         return NORMAL
     
-    def propChange_stream_id(self, id, oldval, newval):
-        self.sri.streamID = self.stream_id
-        self.sriUpdate = True        
-  
+    def prop_update_sri(self, propid, oldval, newval):
+        self.sriUpdate = True
+
+    def prop_update_sri2(self, propid, oldval, newval):
+        self.sriUpdate = True
+
+    def prop_update_sri3(self, propid, oldval, newval):
+        self.sriUpdate = True
+
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.WARN)
     logging.debug("Starting Component")

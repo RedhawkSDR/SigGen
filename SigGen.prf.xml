@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties PUBLIC "-//JTRS//DTD SCA V2.2.2 PRF//EN" "properties.dtd">
 <!-- 
 This file is protected by Copyright. Please refer to the COPYRIGHT file distributed with this 
 source distribution.
@@ -16,7 +17,6 @@ PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this 
 program.  If not, see http://www.gnu.org/licenses/.
 -->
-<!DOCTYPE properties PUBLIC "-//JTRS//DTD SCA V2.2.2 PRF//EN" "properties.dtd">
 <properties>
   <simple id="frequency" mode="readwrite" type="double">
     <description>rate at which the periodic output waveforms repeat.  This value is ignored for aperiodic waveforms.</description>
@@ -69,6 +69,20 @@ program.  If not, see http://www.gnu.org/licenses/.
   <simple id="stream_id" mode="readwrite" type="string">
     <description>bulkio sri streamID for this data source.</description>
     <value>SigGen Stream</value>
+    <kind kindtype="configure"/>
+    <action type="external"/>
+  </simple>
+  <simple id="chan_rf" mode="readwrite" type="double">
+    <description>Sets the CHAN_RF SRI keyword. Set to -1 if not desired.</description>
+    <value>-1</value>
+    <units>Hz</units>
+    <kind kindtype="configure"/>
+    <action type="external"/>
+  </simple>
+  <simple id="col_rf" mode="readwrite" type="double">
+    <description>Sets the COL_RF SRI keyword. Set to -1 if not desired.</description>
+    <value>-1</value>
+    <units>Hz</units>
     <kind kindtype="configure"/>
     <action type="external"/>
   </simple>

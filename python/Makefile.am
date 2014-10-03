@@ -18,7 +18,7 @@
 # vim: noet: softtabstop=0
 
 xmldir = $(prefix)/dom/components/SigGen/
-dist_xml_DATA = ../SigGen.prf.xml ../SigGen.scd.xml ../SigGen.spd.xml
+dist_xml_DATA = ../SigGen.scd.xml ../SigGen.prf.xml ../SigGen.spd.xml
 domdir = $(prefix)/dom/components/SigGen/python/
 
 distclean-local:

@@ -16,9 +16,11 @@
 # program.  If not, see http://www.gnu.org/licenses/.
 #
 
+SigGen_jar_CLASSPATH = $(CLASSPATH_SOFTPKG_DEP)$(OSSIE_HOME)/lib/CFInterfaces.jar:$(OSSIE_HOME)/lib/log4j-1.2.15.jar:$(OSSIE_HOME)/lib/ossie.jar:$(OSSIE_HOME)/lib/bulkio.jar:$(OSSIE_HOME)/lib/BULKIOInterfaces.jar
+
 SigGen.jar: $(SigGen_jar_SOURCES)
 	mkdir -p bin
-	$(JAVAC) -cp $(OSSIE_HOME)/lib/CFInterfaces.jar:$(OSSIE_HOME)/lib/log4j-1.2.15.jar:$(OSSIE_HOME)/lib/ossie.jar:$(OSSIE_HOME)/lib/BULKIOInterfaces.jar:$(OSSIE_HOME)/lib/bulkio.jar -d bin $(SigGen_jar_SOURCES)
+	$(JAVAC) -cp $(SigGen_jar_CLASSPATH) -d bin $(SigGen_jar_SOURCES)
 	$(JAR) cf ./SigGen.jar -C bin .
 
 clean-local:

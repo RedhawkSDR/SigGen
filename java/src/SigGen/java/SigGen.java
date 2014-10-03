@@ -20,10 +20,15 @@ package SigGen.java;
 import java.util.Arrays;
 import java.util.Properties;
 
+import org.omg.CORBA.Any;
+import org.omg.CORBA.AnyHolder;
+import org.omg.CORBA.TCKind;
+import org.ossie.properties.AnyUtils;
 import org.ossie.properties.PropertyListener;
 
 import BULKIO.PrecisionUTCTime;
 import BULKIO.StreamSRI;
+import CF.DataType;
 import CF.ResourcePackage.StartError;
 
 /**
@@ -98,6 +103,14 @@ public class SigGen extends SigGen_base {
 				sriUpdate = true;
 			}
 		});
+
+		PropertyListener<Double> keywordUpdate = new PropertyListener<Double>() {
+			public void valueChanged(Double oldvalue, Double newValue) {
+				sriUpdate = true;
+			}
+		};
+		this.chan_rf.addChangeListener(keywordUpdate);
+		this.col_rf.addChangeListener(keywordUpdate);
     }
     
     public boolean hasSri(String streamID)
@@ -229,9 +242,31 @@ public class SigGen extends SigGen_base {
 			}
 
 			if (sriUpdate || (!hasSri(stream_id.getValue()))) {
+				// Reset the flag first (in case other updates to props occur while we're in here)
 				sriUpdate = false;
 				sri.streamID = stream_id.getValue();
 				sri.xdelta = 1.0 / this.sample_rate.getValue();
+
+				double chan_rf = this.chan_rf.getValue();
+				double col_rf = this.col_rf.getValue();
+				int count = 0;
+				if (chan_rf != -1) {
+					count++;
+				}
+				if (col_rf != -1) {
+					count++;
+				}
+				sri.keywords = new DataType[count];
+				int index = 0;
+				if (chan_rf != -1) {
+					sri.keywords[index] = new DataType("CHAN_RF", AnyUtils.toAny(chan_rf, TCKind.tk_double));
+					index++;
+				}
+				if (col_rf != -1) {
+					sri.keywords[index] = new DataType("COL_RF", AnyUtils.toAny(col_rf, TCKind.tk_double));
+					index++;
+				}
+
 				this.port_out.pushSRI(sri);
 			}
 

@@ -50,9 +50,12 @@ SigGen_i::SigGen_i(const char *uuid, const char *label) :
 	sri.yunits = BULKIO::UNITS_NONE;
 	sri.mode = 0;
 	sri.streamID = this->stream_id.c_str();
+	this->keywordUpdate(NULL, NULL);
 	sriUpdate = true;
 
 	addPropertyChangeListener("stream_id", this, &SigGen_i::stream_idChanged);
+	addPropertyChangeListener("chan_rf", this, &SigGen_i::keywordUpdate);
+	addPropertyChangeListener("col_rf", this, &SigGen_i::keywordUpdate);
 }
 
 
@@ -279,9 +282,35 @@ int SigGen_i::serviceFunction()
 
 void SigGen_i::stream_idChanged(const std::string *oldValue, const std::string *newValue)
 {
-	if (*oldValue != *newValue) {
-		boost::mutex::scoped_lock lock(sigGenLock_);
-		sri.streamID = stream_id.c_str();
-		sriUpdate = true;
+	if (*oldValue == *newValue) {
+		std::cerr << "This can happen!?!";
+		return;
 	}
+
+	boost::mutex::scoped_lock lock(sigGenLock_);
+	sri.streamID = stream_id.c_str();
+	sriUpdate = true;
+}
+
+void SigGen_i::keywordUpdate(const double *oldValue, const double *newValue)
+{
+	boost::mutex::scoped_lock lock(sigGenLock_);
+
+	sri.keywords.length(0);
+	int index = 0;
+
+	if (this->chan_rf != -1.0) {
+		sri.keywords.length(index + 1);
+		sri.keywords[index].id = "CHAN_RF";
+		sri.keywords[index].value <<= this->chan_rf;
+		index++;
+	}
+	if (this->col_rf != -1.0) {
+		sri.keywords.length(index + 1);
+		sri.keywords[index].id = "COL_RF";
+		sri.keywords[index].value <<= this->col_rf;
+		index++;
+	}
+
+	sriUpdate = true;
 }

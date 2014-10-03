@@ -138,4 +138,20 @@ class SigGen_base(CF__POA.Resource, Resource, ThreadedComponent):
                                     kinds=("configure",),
                                     description="""bulkio sri streamID for this data source.""")
         
+        chan_rf = simple_property(id_="chan_rf",
+                                  type_="double",
+                                  defvalue=-1.0,
+                                  mode="readwrite",
+                                  action="external",
+                                  kinds=("configure",),
+                                  description="""Sets the CHAN_RF SRI keyword. Set to -1 if not desired.""")
+        
+        col_rf = simple_property(id_="col_rf",
+                                 type_="double",
+                                 defvalue=-1.0,
+                                 mode="readwrite",
+                                 action="external",
+                                 kinds=("configure",),
+                                 description="""Sets the COL_RF SRI keyword. Set to -1 if not desired.""")
+        
 

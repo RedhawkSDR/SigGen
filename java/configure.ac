@@ -15,7 +15,8 @@
 # You should have received a copy of the GNU Lesser General Public License along with this 
 # program.  If not, see http://www.gnu.org/licenses/.
 #
-AC_INIT(SigGen, 1.0.1)
+
+AC_INIT(SigGen, 1.1.0)
 AM_INIT_AUTOMAKE(nostdinc)
 
 AC_CORBA_ORB
@@ -30,7 +31,7 @@ PKG_CHECK_MODULES([OSSIE], [ossie >= 1.10])
 AC_CHECK_PROG([JAVAC], [javac], [javac], [AC_MSG_ERROR([cannot find Java compiler])])
 AC_CHECK_PROG([JAR], [jar], [jar], [AC_MSG_ERROR([cannot find jar program])])
 
-PKG_CHECK_MODULES([INTERFACEDEPS], [bulkio >= 1.0 bulkioInterfaces >= 1.10])
+PKG_CHECK_MODULES([INTERFACEDEPS], [bulkio >= 1.10])
 
 AC_CONFIG_FILES(Makefile)
 AC_OUTPUT
