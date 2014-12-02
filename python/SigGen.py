@@ -59,7 +59,7 @@ class SigGen_i(SigGen_base):
         self._waveform = Waveform.Waveform()
 
         # Separate listeners required. Bug fixed in CF 1.10.1
-        self.addPropertyChangeListener("streamid", self.prop_update_sri)
+        self.addPropertyChangeListener("stream_id", self.prop_update_sri)
         self.addPropertyChangeListener("chan_rf", self.prop_update_sri2)
         self.addPropertyChangeListener("col_rf", self.prop_update_sri3)
 
@@ -148,6 +148,7 @@ class SigGen_i(SigGen_base):
         return NORMAL
     
     def prop_update_sri(self, propid, oldval, newval):
+        self.sri.streamID = self.stream_id
         self.sriUpdate = True
 
     def prop_update_sri2(self, propid, oldval, newval):
