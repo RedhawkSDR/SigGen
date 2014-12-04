@@ -49,6 +49,7 @@ SigGen_i::SigGen_i(const char *uuid, const char *label) :
 	sri.ydelta = 0.0;
 	sri.yunits = BULKIO::UNITS_NONE;
 	sri.mode = 0;
+	sri.blocking = false;
 	sri.streamID = this->stream_id.c_str();
 	this->keywordUpdate(NULL, NULL);
 	sriUpdate = true;
