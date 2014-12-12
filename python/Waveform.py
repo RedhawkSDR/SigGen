@@ -56,14 +56,14 @@ class Waveform:
     # @return the new data buffer
     def whitenoise(self, sdev, n, spa=1):
         outbuff = range(n*spa)
-        v1 = 0.0; v2 = 0.0; sum = 0.0
+        v1 = 0.0; v2 = 0.0; sum1 = 0.0
         fdev = float(sdev)
         factor = -2.0 / math.log(10.0)
         sis = float(self.seed)/self.T26
         
         maxIndex = n*spa
         #Do this is in a while loop instead of a for loop
-        #because we don't know how many times the sum is invalid 
+        #because we don't know how many times the sum1 is invalid 
         #we are forced to continue
         i=0
         while i < maxIndex:
@@ -77,11 +77,11 @@ class Waveform:
             v2 = float(sis)
             v2 = v2+v2-1
 
-            sum = v1*v1 + v2*v2
-            if sum >= 1.0 or sum <1e-20: continue
-            sum = fdev * float(math.sqrt(factor*math.log(sum)/sum))
-            outbuff[i] = v1*sum
-            outbuff[i+1] = v2*sum
+            sum1 = v1*v1 + v2*v2
+            if sum1 >= 1.0 or sum1 <1e-20: continue
+            sum1 = fdev * float(math.sqrt(factor*math.log(sum1)/sum1))
+            outbuff[i] = v1*sum1
+            outbuff[i+1] = v2*sum1
             i+=2
         
         self.seed = int(sis*self.T26)
