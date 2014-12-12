@@ -86,4 +86,10 @@ program.  If not, see http://www.gnu.org/licenses/.
     <kind kindtype="configure"/>
     <action type="external"/>
   </simple>
+  <simple id="sri_blocking" mode="readwrite" type="boolean">
+    <value>False</value>
+    <units></units>
+    <kind kindtype="configure"/>
+    <action type="external"/>
+  </simple>
 </properties>
