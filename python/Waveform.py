@@ -55,6 +55,10 @@ class Waveform:
     # @param spa  Scalars per atom, 2 for Complex
     # @return the new data buffer
     def whitenoise(self, sdev, n, spa=1):
+        #CA-45 When odd number of elements, reduce by one to avoid referencing array element
+        # that is out of bounds in outbuff[i+1]
+        if (n % 2) == 1:
+            n -= 1
         outbuff = range(n*spa)
         v1 = 0.0; v2 = 0.0; sum1 = 0.0
         fdev = float(sdev)
