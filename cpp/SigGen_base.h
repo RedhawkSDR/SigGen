@@ -49,6 +49,7 @@ class SigGen_base : public Resource_impl, protected ThreadedComponent
         std::string stream_id;
         double chan_rf;
         double col_rf;
+        bool sri_blocking;
 
         // Ports
         bulkio::OutDoublePort *out;

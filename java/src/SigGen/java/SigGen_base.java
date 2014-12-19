@@ -1,20 +1,3 @@
-/*
- * This file is protected by Copyright. Please refer to the COPYRIGHT file distributed with this 
- * source distribution.
- * 
- * This file is part of REDHAWK Basic Components SigGen.
- * 
- * REDHAWK Basic Components SigGen is free software: you can redistribute it and/or modify it under the terms of 
- * the GNU Lesser General Public License as published by the Free Software Foundation, either 
- * version 3 of the License, or (at your option) any later version.
- * 
- * REDHAWK Basic Components SigGen is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
- * PURPOSE.  See the GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License along with this 
- * program.  If not, see http://www.gnu.org/licenses/.
- */
 package SigGen.java;
 
 import java.util.Properties;
@@ -191,6 +174,22 @@ public abstract class SigGen_base extends ThreadedResource {
             new Kind[] {Kind.CONFIGURE} //kind
             );
     
+    /**
+     * The property sri_blocking
+     * If the meaning of this property isn't clear, a description should be added.
+     *
+     * @generated
+     */
+    public final BooleanProperty sri_blocking =
+        new BooleanProperty(
+            "sri_blocking", //id
+            null, //name
+            false, //default value
+            Mode.READWRITE, //mode
+            Action.EXTERNAL, //action
+            new Kind[] {Kind.CONFIGURE} //kind
+            );
+    
     // Uses/outputs
     /**
      * @generated
@@ -214,6 +213,7 @@ public abstract class SigGen_base extends ThreadedResource {
         addProperty(stream_id);
         addProperty(chan_rf);
         addProperty(col_rf);
+        addProperty(sri_blocking);
 
         // Uses/outputs
         this.port_out = new bulkio.OutDoublePort("out");

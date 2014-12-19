@@ -48,7 +48,9 @@ class SigGen_i(SigGen_base):
             keywords.append(CF.DataType('CHAN_RF', any.to_any(self.chan_rf)))
         if self.col_rf != -1:
             keywords.append(CF.DataType('COL_RF', any.to_any(self.col_rf)))
-        self.sri = BULKIO.StreamSRI(1, 0.0, 0.0, BULKIO.UNITS_TIME, 0, 0.0, 0.0, BULKIO.UNITS_NONE, 0, self.stream_id, False, keywords)
+        if self.sri_blocking == None:
+            self.sri_blocking = False
+        self.sri = BULKIO.StreamSRI(1, 0.0, 0.0, BULKIO.UNITS_TIME, 0, 0.0, 0.0, BULKIO.UNITS_NONE, 0, self.stream_id, self.sri_blocking, keywords)
         self.sriUpdate = True
         self.phase = 0
         self.chirp = 0
@@ -62,6 +64,8 @@ class SigGen_i(SigGen_base):
         self.addPropertyChangeListener("stream_id", self.prop_update_sri)
         self.addPropertyChangeListener("chan_rf", self.prop_update_sri2)
         self.addPropertyChangeListener("col_rf", self.prop_update_sri3)
+        #CA-24 Adding SRI Blocking property listener
+        self.addPropertyChangeListener("sri_blocking", self.prop_update_sri_blocking)
 
     def start(self):
         self.next_time = bulkio.timestamp.now()
@@ -157,6 +161,17 @@ class SigGen_i(SigGen_base):
     def prop_update_sri3(self, propid, oldval, newval):
         self.sriUpdate = True
 
+    #CA-24 Checking for changes to the SRI Blocking property
+    def prop_update_sri_blocking(self, propid, oldval, newval):
+        if newval != None:
+            self.sri.blocking = newval
+        elif oldval != None:
+            self.sri.blocking = oldval
+        else:
+            self.sri.blocking = False
+            
+        self.sriUpdate = True
+        
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.WARN)
     logging.debug("Starting Component")

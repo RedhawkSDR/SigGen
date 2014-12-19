@@ -1,22 +1,5 @@
 #!/usr/bin/env python
 #
-# This file is protected by Copyright. Please refer to the COPYRIGHT file distributed with this 
-# source distribution.
-# 
-# This file is part of REDHAWK Basic Components SigGen.
-# 
-# REDHAWK Basic Components SigGen is free software: you can redistribute it and/or modify it under the terms of 
-# the GNU Lesser General Public License as published by the Free Software Foundation, either 
-# version 3 of the License, or (at your option) any later version.
-# 
-# REDHAWK Basic Components SigGen is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
-# PURPOSE.  See the GNU Lesser General Public License for more details.
-# 
-# You should have received a copy of the GNU Lesser General Public License along with this 
-# program.  If not, see http://www.gnu.org/licenses/.
-#
-#
 # AUTO-GENERATED CODE.  DO NOT MODIFY!
 #
 # Source: SigGen.spd.xml
@@ -153,5 +136,12 @@ class SigGen_base(CF__POA.Resource, Resource, ThreadedComponent):
                                  action="external",
                                  kinds=("configure",),
                                  description="""Sets the COL_RF SRI keyword. Set to -1 if not desired.""")
+        
+        sri_blocking = simple_property(id_="sri_blocking",
+                                       type_="boolean",
+                                       defvalue=False,
+                                       mode="readwrite",
+                                       action="external",
+                                       kinds=("configure",))
         
 

@@ -156,6 +156,15 @@ void SigGen_base::loadProperties()
                 "external",
                 "configure");
 
+    addProperty(sri_blocking,
+                false,
+                "sri_blocking",
+                "",
+                "readwrite",
+                "",
+                "external",
+                "configure");
+
 }
 
 

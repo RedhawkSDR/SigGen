@@ -91,6 +91,8 @@ public class SigGen extends SigGen_base {
 		sri.subsize = 0;
 		sri.xunits = 1; // TIME_S
 		sri.streamID = (this.stream_id.getValue() != null) ? this.stream_id.getValue() : "";
+		sri.blocking = (this.sri_blocking.getValue() != null) ?
+				this.sri_blocking.getValue() : false;
 		sriUpdate = true;
 		this.stream_id.addChangeListener(new PropertyListener<String>() {
 			public void valueChanged(String oldValue, String newValue) {
@@ -111,6 +113,14 @@ public class SigGen extends SigGen_base {
 		};
 		this.chan_rf.addChangeListener(keywordUpdate);
 		this.col_rf.addChangeListener(keywordUpdate);
+		
+		//#CA-24 SRI Blocking property change listener
+		this.sri_blocking.addChangeListener(new PropertyListener<Boolean>() {
+			public void valueChanged(Boolean oldValue, Boolean newValue) {
+				sri.blocking = (newValue != null) ? newValue : (oldValue != null) ? oldValue : false;
+				sriUpdate = true;
+			}
+		});
     }
     
     public boolean hasSri(String streamID)
@@ -268,7 +278,7 @@ public class SigGen extends SigGen_base {
 					sri.keywords[index] = new DataType("COL_RF", AnyUtils.toAny(col_rf, TCKind.tk_double));
 					index++;
 				}
-
+				
 				this.port_out.pushSRI(sri);
 			}
 
