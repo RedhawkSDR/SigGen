@@ -114,7 +114,7 @@ public class SigGen extends SigGen_base {
 		this.chan_rf.addChangeListener(keywordUpdate);
 		this.col_rf.addChangeListener(keywordUpdate);
 		
-		//#CA-24 SRI Blocking property change listener
+		// SRI Blocking property change listener
 		this.sri_blocking.addChangeListener(new PropertyListener<Boolean>() {
 			public void valueChanged(Boolean oldValue, Boolean newValue) {
 				sri.blocking = (newValue != null) ? newValue : (oldValue != null) ? oldValue : false;
@@ -251,7 +251,7 @@ public class SigGen extends SigGen_base {
 				sriUpdate = true;
 			}
 
-			// #CA-58 Only push Sri if there has been an update or Sri is available
+			// Only push Sri if there has been an update or Sri is available
 			if (sriUpdate || (hasSri(stream_id.getValue()))) {
 				
 				// Reset the flag first (in case other updates to props occur while we're in here)

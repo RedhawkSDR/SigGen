@@ -88,7 +88,7 @@ public class Waveform {
   public static void whitenoise (double[] dbuf, double sdev, int n, int spa) {
     double v1,v2,sum, sis=((double)seed)/T26;
     double factor = -2.0 / Math.log(10.0);
-    // CA-45 Crash fix for when using odd number for xfer_len (2nd dbuf[i++])
+    // Crash fix for when using odd number for xfer_len (2nd dbuf[i++])
     if ((n % 2) == 1) {
     	n -= 1;
     }

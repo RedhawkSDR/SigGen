@@ -57,7 +57,7 @@ SigGen_i::SigGen_i(const char *uuid, const char *label) :
 	addPropertyChangeListener("stream_id", this, &SigGen_i::stream_idChanged);
 	addPropertyChangeListener("chan_rf", this, &SigGen_i::keywordUpdate);
 	addPropertyChangeListener("col_rf", this, &SigGen_i::keywordUpdate);
-	//#CA-24 Add property change listener for sri_blocking property
+	// Add property change listener for sri_blocking property
 	addPropertyChangeListener("sri_blocking", this, &SigGen_i::sri_blockingChanged);
 
 }
@@ -319,7 +319,7 @@ void SigGen_i::keywordUpdate(const double *oldValue, const double *newValue)
 	sriUpdate = true;
 }
 
-//#CA-24 Update the sri_blocking property
+// Update the sri_blocking property
 void SigGen_i::sri_blockingChanged(const bool *oldValue, const bool *newValue)
 {
 	boost::mutex::scoped_lock lock(sigGenLock_);
