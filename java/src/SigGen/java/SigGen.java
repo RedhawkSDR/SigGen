@@ -40,7 +40,8 @@ import CF.ResourcePackage.StartError;
  * Source: SigGen.spd.xml
  */
 public class SigGen extends SigGen_base {
-	double[] data = new double[this.xfer_len.getValue()];
+	float[] floatData = new float[this.xfer_len.getValue()];
+	short[] shortData = new short[this.xfer_len.getValue()];
 	double phase = 0;
 	double chirp = 0;
 	double delta_phase;
@@ -79,9 +80,6 @@ public class SigGen extends SigGen_base {
      */
     public SigGen() {
         super();
-        data = new double[this.xfer_len.getValue()];
-		phase = 0;
-		chirp = 0;
         
         sri = new StreamSRI();
         sri.hversion = 1;
@@ -124,7 +122,7 @@ public class SigGen extends SigGen_base {
     
     public boolean hasSri(String streamID)
 	{
-		return Arrays.asList(port_out.activeSRIs()).contains(streamID);
+		return Arrays.asList(port_dataFloat_out.activeSRIs()).contains(streamID);
 	}
 
     @Override
@@ -245,8 +243,9 @@ public class SigGen extends SigGen_base {
     
     protected int serviceFunction() {
 			/// If the transfer length has changed, reallocate the buffer
-			if (this.xfer_len.getValue() != data.length) {
-				data = new double[this.xfer_len.getValue()];
+			if (this.xfer_len.getValue() != floatData.length) {
+				floatData = new float[this.xfer_len.getValue()];
+				shortData = new short[this.xfer_len.getValue()];
 				sriUpdate = true;
 			}
 
@@ -277,7 +276,8 @@ public class SigGen extends SigGen_base {
 					index++;
 				}
 				
-				this.port_out.pushSRI(sri);
+				this.port_dataFloat_out.pushSRI(sri);
+				this.port_dataShort_out.pushSRI(sri);
 			}
 
 			delta_phase = this.frequency.getValue() * sri.xdelta;
@@ -288,34 +288,38 @@ public class SigGen extends SigGen_base {
 
 			// Generate the Waveform
 			if (this.shape.getValue().equals("sine")) {
-				Waveform.sincos(data, this.magnitude.getValue(), phase, delta_phase, data.length, 1);
+				Waveform.sincos(floatData, this.magnitude.getValue(), phase, delta_phase, floatData.length, 1);
 			} else if (this.shape.getValue().equals("square")) {
-				Waveform.square(data, this.magnitude.getValue(), phase, delta_phase, data.length, 1);
+				Waveform.square(floatData, this.magnitude.getValue(), phase, delta_phase, floatData.length, 1);
 			} else if (this.shape.getValue().equals("triangle")) {
-				Waveform.triangle(data, this.magnitude.getValue(), phase, delta_phase, data.length, 1);
+				Waveform.triangle(floatData, this.magnitude.getValue(), phase, delta_phase, floatData.length, 1);
 			} else if (this.shape.getValue().equals("sawtooth")) {
-				Waveform.sawtooth(data, this.magnitude.getValue(), phase, delta_phase, data.length, 1);
+				Waveform.sawtooth(floatData, this.magnitude.getValue(), phase, delta_phase, floatData.length, 1);
 			} else if (this.shape.getValue().equals("pulse")) {
-				Waveform.pulse(data, this.magnitude.getValue(), phase, delta_phase, data.length, 1);
+				Waveform.pulse(floatData, this.magnitude.getValue(), phase, delta_phase, floatData.length, 1);
 			} else if (this.shape.getValue().equals("constant")) {
-				Waveform.constant(data, this.magnitude.getValue(), data.length, 1);
+				Waveform.constant(floatData, this.magnitude.getValue(), floatData.length, 1);
 			} else if (this.shape.getValue().equals("whitenoise")) {
-				Waveform.whitenoise(data, this.magnitude.getValue(), data.length, 1);
+				Waveform.whitenoise(floatData, this.magnitude.getValue(), floatData.length, 1);
 			} else if (this.shape.getValue().equals("lrs")) {
-				Waveform.lrs(data, this.magnitude.getValue(), data.length, 1, 1);
+				Waveform.lrs(floatData, this.magnitude.getValue(), floatData.length, 1, 1);
 			}
 
-			phase += delta_phase*data.length; // increment phase
+			phase += delta_phase*floatData.length; // increment phase
 			phase -= Math.floor(phase); // modulo 1.0
 
 			// Push the data
-			this.port_out.pushPacket(data,
-					this.nextTime,
-					false,
-					sri.streamID);
-
+			if (this.port_dataFloat_out.isActive()) {
+				this.port_dataFloat_out.pushPacket(floatData, this.nextTime, false, sri.streamID);
+			}
+			
+			if (this.port_dataShort_out.isActive()) {
+				convertFloat2short(floatData, shortData);
+				this.port_dataShort_out.pushPacket(shortData, this.nextTime, false, sri.streamID);
+			}
+			
 			// Advance time
-			this.nextTime.tfsec += data.length * sri.xdelta;
+			this.nextTime.tfsec += floatData.length * sri.xdelta;
 			if (this.nextTime.tfsec > 1.0) {
 				this.nextTime.tfsec -= 1.0;
 				this.nextTime.twsec += 1.0;
@@ -323,7 +327,7 @@ public class SigGen extends SigGen_base {
 
 			// If we are throttling, wait...otherwise run at full speed
 			if (this.throttle.getValue() == true) {
-				long wait_amt = (long)(data.length * sri.xdelta * 1000);
+				long wait_amt = (long)(floatData.length * sri.xdelta * 1000);
 				try {
 					Thread.sleep(wait_amt);
 				} catch (InterruptedException e) {
@@ -331,7 +335,15 @@ public class SigGen extends SigGen_base {
 			}
 			return NORMAL;
     }
+    
+    // Convert the float array of data to a short array, checking for lower/upper bounds
+    private void convertFloat2short(float[] src, short[] dst) {
 
+    	for (int i = 0; i < dst.length; i++ ) {
+    		dst[i] = (short) Math.min(Short.MAX_VALUE, Math.max(Short.MIN_VALUE, src[i]));
+    	}
+    }
+    
     /**
      * Set additional options for ORB startup. For example:
      *

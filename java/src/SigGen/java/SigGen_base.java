@@ -4,15 +4,15 @@
  * 
  * This file is part of REDHAWK Basic Components SigGen.
  * 
- * REDHAWK Basic Components SigGen is free software: you can redistribute it and/or modify it under the terms of 
- * the GNU Lesser General Public License as published by the Free Software Foundation, either 
+ * REDHAWK Basic Components SigGen is free software: you can redistribute it and/or modify it under the terms of
+ * the GNU Lesser General Public License as published by the Free Software Foundation, either
  * version 3 of the License, or (at your option) any later version.
  * 
- * REDHAWK Basic Components SigGen is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+ * REDHAWK Basic Components SigGen is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
  * PURPOSE.  See the GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU Lesser General Public License along with this 
+ * You should have received a copy of the GNU Lesser General Public License along with this
  * program.  If not, see http://www.gnu.org/licenses/.
  */
 package SigGen.java;
@@ -89,7 +89,7 @@ public abstract class SigGen_base extends ThreadedResource {
         new DoubleProperty(
             "magnitude", //id
             null, //name
-            1.0, //default value
+            100.0, //default value
             Mode.READWRITE, //mode
             Action.EXTERNAL, //action
             new Kind[] {Kind.CONFIGURE} //kind
@@ -211,7 +211,12 @@ public abstract class SigGen_base extends ThreadedResource {
     /**
      * @generated
      */
-    public bulkio.OutDoublePort port_out;
+    public bulkio.OutFloatPort port_dataFloat_out;
+
+    /**
+     * @generated
+     */
+    public bulkio.OutShortPort port_dataShort_out;
 
     /**
      * @generated
@@ -233,8 +238,10 @@ public abstract class SigGen_base extends ThreadedResource {
         addProperty(sri_blocking);
 
         // Uses/outputs
-        this.port_out = new bulkio.OutDoublePort("out");
-        this.addPort("out", this.port_out);
+        this.port_dataFloat_out = new bulkio.OutFloatPort("dataFloat_out");
+        this.addPort("dataFloat_out", this.port_dataFloat_out);
+        this.port_dataShort_out = new bulkio.OutShortPort("dataShort_out");
+        this.addPort("dataShort_out", this.port_dataShort_out);
     }
 
     public void start() throws CF.ResourcePackage.StartError

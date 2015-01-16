@@ -38,8 +38,10 @@ class SigGen_i : public SigGen_base
         void stream_idChanged(const std::string *oldValue, const std::string *newValue);
         void keywordUpdate(const double *oldValue, const double *newValue);
         void sri_blockingChanged(const bool *oldValue, const bool *newValue);
+        void convertFloat2short(std::vector<float>& src, std::vector<short>& dst);
 
-    	std::vector<double> data;
+        std::vector<float> floatData;
+        std::vector<short> shortData;
     	double phase;
     	double chirp;
     	double sample_time_delta;
@@ -49,6 +51,7 @@ class SigGen_i : public SigGen_base
     	BULKIO::StreamSRI sri;
     	bool sriUpdate;
         BULKIO::PrecisionUTCTime nextTime;
+
 };
 
 #endif

@@ -24,6 +24,8 @@ import test_utils
 from ossie.properties import props_from_dict
 import time
 import waveforms
+import numpy as np
+from array import array
 
 class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
     """Test for all component implementations in SigGen"""
@@ -86,13 +88,17 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
     def setUp(self):
         """Set up the unit test - this is run before every method that starts with test        """
         ossie.utils.testing.ScaComponentTestCase.setUp(self)
-        self.sink = test_utils.MyDataSink()
+        self.floatSink = test_utils.MyDataSink()
+        self.shortSink = test_utils.MyDataSink()
+
         #start all components
         self.launch(initialize=True)
         self.comp.start()
-        self.sink.start()
+        self.floatSink.start()
+        self.shortSink.start()
         #do the connections
-        self.comp.connect(self.sink)
+        self.comp.connect(self.floatSink, usesPortName='dataFloat_out')
+        self.comp.connect(self.shortSink, usesPortName="dataShort_out")
         self.waveforms = waveforms.Waveforms()
         
 
@@ -102,25 +108,26 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         #######################################################################
         # Simulate regular component shutdown
         self.comp.releaseObject()
-        self.sink.stop()
+        self.floatSink.stop()
+        self.shortSink.stop()
         ossie.utils.testing.ScaComponentTestCase.tearDown(self)
     
     def _generate_config(self):
         self.config_params = {}
-        self.config_params["frequency"] = 2000.
+        self.config_params["frequency"] = 1000.
         self.config_params["sample_rate"] = 5000.
-        self.config_params["magnitude"] = 10.
+        self.config_params["magnitude"] = 100.
         self.config_params["xfer_len"] = 1000
         self.config_params["stream_id"] = "unit_test_stream"
 
-    def _get_received_data(self, start_time, time_len):
+    def _get_received_data(self, start_time, time_len, sink):
         received_data1 = []
         eos_all = False
         count = 0
         done = False
         stop_time = start_time + time_len
         while not (eos_all or done):
-            out = self.sink.getData()
+            out = sink.getData()
             for p in out:
                 if p.T.twsec + p.T.tfsec >= start_time:
                     received_data1.append(p)
@@ -137,9 +144,19 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
             if count == 2000:
                 break
         return received_data1
-    
+
+    def _convert_float_2_short(self, data):
+        shortData = array("h")
+        shortMin = np.iinfo(np.int16).min
+        shortMax = np.iinfo(np.int16).max
+                
+        for i in range(len(data)):
+            shortData.append(np.int16(min(shortMax, max(shortMin, np.float32(data[i])))))
+             
+        return shortData.tolist()
+
     def test_constant(self):
-        print "\n... Starting Test Constant"
+        print "\n... Starting Test Constant with dataFloat_out"
         self._generate_config()
         self.config_params["shape"] = "constant"
         
@@ -147,17 +164,29 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         time.sleep(1.) # Ensure SigGen is sending out the desired signal before continuing
         start_time = time.time()
         rx_len_sec = 1. # Get 1s worth of data
-        rx_data = self._get_received_data(start_time, rx_len_sec)
+        rx_data = self._get_received_data(start_time, rx_len_sec, self.floatSink)
         print "\nReceived Data Time Range:"
         print rx_data[0].T
         print rx_data[-1].T
         
-        expected_value = self.config_params["magnitude"]
+        expected_value = np.float32(self.config_params["magnitude"])
+        for p in rx_data:
+            # Data returned is list of test_utils.BufferedPacket
+            for value in p.data:
+                self.assertAlmostEqual(np.float32(value), expected_value)
+ 
+        print "\n... Starting Test Constant with dataShort_out"
+        rx_data = self._get_received_data(start_time, rx_len_sec, self.shortSink)
+        print "\nReceived Data Time Range:"
+        print rx_data[0].T
+        print rx_data[-1].T
+        
+        expected_value = np.int16(self.config_params["magnitude"])
         for p in rx_data:
             # Data returned is list of test_utils.BufferedPacket
             for value in p.data:
                 self.assertEqual(value, expected_value)
-
+        
 
     def test_throttle(self):
         print "\n... Starting Throttle Test"
@@ -169,9 +198,8 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         time.sleep(1.) # Ensure SigGen is sending out the desired signal before continuing
         start_time = time.time()
         rx_len_sec = 1. # Get 1s worth of data
-        rx_data = self._get_received_data(start_time, rx_len_sec)
+        rx_data = self._get_received_data(start_time, rx_len_sec, self.floatSink)
 
-        
         expected_num_packets = self.config_params["sample_rate"]/self.config_params["xfer_len"]
         n_packets = len(rx_data)
         
@@ -180,7 +208,7 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         self.assertTrue(n_packets >= expected_num_packets-1 and n_packets <= expected_num_packets+1) # Allow for +/- packet tolerance due to how we're getting the data
 
     def test_pulse(self):
-        print "\n... Starting Test Pulse"
+        print "\n... Starting Test Pulse with dataFloat_out"
         self._generate_config()
         self.config_params["shape"] = "pulse"
         
@@ -188,16 +216,29 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         time.sleep(1.) # Ensure SigGen is sending out the desired signal before continuing
         start_time = time.time()
         rx_len_sec = 1. # Get 1s worth of data
-        rx_data = self._get_received_data(start_time, rx_len_sec)
+        rx_data = self._get_received_data(start_time, rx_len_sec, self.floatSink)
         print "\nReceived Data Time Range:"
         print rx_data[0].T
         print rx_data[-1].T
         
-        expected_value = self.config_params["magnitude"]
+        expected_value = np.float32(self.config_params["magnitude"])
+        for p in rx_data:
+            # Data returned is list of test_utils.BufferedPacket
+            for value in p.data:
+                self.assertTrue(np.float32(value) == expected_value or value == 0)
+
+        print "\n... Starting Test Pulse with dataShort_out"
+        rx_data = self._get_received_data(start_time, rx_len_sec, self.shortSink)
+        print "\nReceived Data Time Range:"
+        print rx_data[0].T
+        print rx_data[-1].T
+        
+        expected_value = np.int16(self.config_params["magnitude"])
         for p in rx_data:
             # Data returned is list of test_utils.BufferedPacket
             for value in p.data:
                 self.assertTrue(value == expected_value or value == 0)
+                       
     
     def test_stream_id(self):
         print "\n... Starting Test Stream ID"
@@ -212,7 +253,7 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         time.sleep(1.) # Ensure SigGen is sending out the desired signal before continuing
         start_time = time.time()
         rx_len_sec = 1. # Get 1s worth of data
-        rx_data = self._get_received_data(start_time, rx_len_sec)
+        rx_data = self._get_received_data(start_time, rx_len_sec, self.floatSink)
         print "\nReceived Data 1 Time Range:"
         print rx_data[0].T
         print rx_data[-1].T
@@ -224,7 +265,7 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         time.sleep(1.) # Ensure SigGen is sending out the desired signal before continuing
         start_time = time.time()
         rx_len_sec = 1. # Get 1s worth of data
-        rx_data = self._get_received_data(start_time, rx_len_sec)
+        rx_data = self._get_received_data(start_time, rx_len_sec, self.floatSink)
         print "\nReceived Data 2 Time Range:"
         print rx_data[0].T
         print rx_data[-1].T
@@ -233,7 +274,7 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
             self.assertEqual(p.sri.streamID, test_stream_id)
         
     def test_lrs(self):
-        print "\n... Starting Test lrs"
+        print "\n... Starting Test lrs with dataFloat_out"
         self._generate_config()
         self.config_params["shape"] = "lrs"
         
@@ -241,7 +282,7 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         time.sleep(1.) # Ensure SigGen is sending out the desired signal before continuing
         start_time = time.time()
         rx_len_sec = 1. # Get 1s worth of data
-        rx_data = self._get_received_data(start_time, rx_len_sec)
+        rx_data = self._get_received_data(start_time, rx_len_sec, self.floatSink)
         print "\nReceived Data Time Range:"
         print rx_data[0].T
         print rx_data[-1].T
@@ -252,33 +293,48 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
             # Data returned is list of test_utils.BufferedPacket
             self.assertEqual(len(p.data), n_expected)
             for rx_val, exp_val in zip(p.data, expected_values):
+                self.assertAlmostEqual(np.float32(rx_val), np.float32(exp_val), 4)
+ 
+        print "\n... Starting Test lrs with dataShort_out"
+        rx_data = self._get_received_data(start_time, rx_len_sec, self.shortSink)
+        print "\nReceived Data Time Range:"
+        print rx_data[0].T
+        print rx_data[-1].T
+        
+        expected_values = self.waveforms.generate_lrs(self.config_params["magnitude"], self.config_params["xfer_len"])
+        expected_values = self._convert_float_2_short(expected_values)
+        n_expected = len(expected_values)
+        for p in rx_data:
+            # Data returned is list of test_utils.BufferedPacket
+            self.assertEqual(len(p.data), n_expected)
+            for rx_val, exp_val in zip(p.data, expected_values):
                 self.assertEqual(rx_val, exp_val)
-    
+
+                
     def test_sine(self):
-        print "\n... Starting Test sine"
         self._test_signal_with_phase("sine", self.waveforms.generate_sine)
     
     def test_sawtooth(self):
-        print "\n... Starting Test sawtooth"
         self._test_signal_with_phase("sawtooth", self.waveforms.generate_sawtooth)
     
     def test_square(self):
-        print "\n... Starting Test square"
         self._test_signal_with_phase("square", self.waveforms.generate_square)
         
     def test_triangle(self):
-        print "\n... Starting Test triangle"
         self._test_signal_with_phase("triangle", self.waveforms.generate_triangle)
     
+       
     def _test_signal_with_phase(self, shape, signal_function):
+        print "\n... Starting Test " + shape + " with dataFloat_out"
         self._generate_config()
         self.config_params["shape"] = shape
+        self.config_params["magnitude"] = 100.  # Default magnitude
         
         self.comp_obj.configure(props_from_dict(self.config_params))
         time.sleep(1.) # Ensure SigGen is sending out the desired signal before continuing
         start_time = time.time()
         rx_len_sec = 1. # Get 1s worth of data
-        rx_data = self._get_received_data(start_time, rx_len_sec)
+        rx_data = self._get_received_data(start_time, rx_len_sec, self.floatSink)
         print "\nReceived Data Time Range:"
         print rx_data[0].T
         print rx_data[-1].T
@@ -290,10 +346,26 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
             # Data returned is list of test_utils.BufferedPacket
             self.assertEqual(len(p.data), n_expected)
             for rx_val, exp_val in zip(p.data, expected_values):
+                self.assertAlmostEqual(np.float32(rx_val), np.float32(exp_val), 4)
+
+        print "\n... Starting Test " + shape + " with dataShort_out"
+        rx_data = self._get_received_data(start_time, rx_len_sec, self.shortSink)
+        print "\nReceived Data Time Range:"
+        print rx_data[0].T
+        print rx_data[-1].T
+        
+        expected_values = signal_function(self.config_params["magnitude"], self.config_params["xfer_len"], dp=delta_phase )
+        expected_values = self._convert_float_2_short(expected_values)
+        n_expected = len(expected_values)
+        
+        for p in rx_data:
+            # Data returned is list of test_utils.BufferedPacket
+            self.assertEqual(len(p.data), n_expected)
+            for rx_val, exp_val in zip(p.data, expected_values):
                 self.assertEqual(rx_val, exp_val)
                 
     def test_push_sri(self):
-        print "\n...Starting Test push sri"
+        print "\n...Starting Test push sri with dataFloat_out"
         self._generate_config()
         
         self.config_params.pop("stream_id")
@@ -301,27 +373,51 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         time.sleep(1.) # Ensure SigGen is sending out the desired signal before continuing
         start_time = time.time()
         rx_len_sec= 1. # Get 1s worth of data
-        rx_data = self._get_received_data(start_time, rx_len_sec)
+        rx_data = self._get_received_data(start_time, rx_len_sec, self.floatSink)
         print "\nReceived Data Time Range:"
         print rx_data[0].T
         print rx_data[-1].T
         
         for p in rx_data:
             self.assertAlmostEqual(self.config_params["sample_rate"], 1 / p.sri.xdelta)
-            
+        
+        print "\n...Starting Test push sri with dataShort_out"
+        rx_data = self._get_received_data(start_time, rx_len_sec, self.shortSink)
+        print "\nReceived Data Time Range:"
+        print rx_data[0].T
+        print rx_data[-1].T
+        
+        for p in rx_data:
+            self.assertAlmostEqual(self.config_params["sample_rate"], 1 / p.sri.xdelta)
+
     def test_no_configure(self):
-        print "\n...Starting Test no configure"
+        print "\n...Starting Test no configure with dataFloat_out"
         
         time.sleep(1.)
         start_time = time.time()
         rx_len_sec = 1. 
-        rx_data = self._get_received_data(start_time, rx_len_sec)
+        rx_data = self._get_received_data(start_time, rx_len_sec, self.floatSink)
         print "\nReceived Data Time Range:"
         print rx_data[0].T
         print rx_data[-1].T
         
         delta_phase = self.comp.frequency / self.comp.sample_rate
         expected_values = self.waveforms.generate_sine(self.comp.magnitude, self.comp.xfer_len, dp=delta_phase )
+        n_expected = len(expected_values)
+        for p in rx_data:
+            # Data returned is list of test_utils.BufferedPacket
+            self.assertEqual(len(p.data), n_expected)
+            for rx_val, exp_val in zip(p.data, expected_values):
+                self.assertAlmostEqual(np.float32(rx_val), np.float32(exp_val), 5)
+    
+        print "\n...Starting Test no configure with dataShort_out"
+        rx_data = self._get_received_data(start_time, rx_len_sec, self.shortSink)
+        print "\nReceived Data Time Range:"
+        print rx_data[0].T
+        print rx_data[-1].T
+        
+        expected_values = self.waveforms.generate_sine(self.comp.magnitude, self.comp.xfer_len, dp=delta_phase )
+        expected_values = self._convert_float_2_short(expected_values)
         n_expected = len(expected_values)
         for p in rx_data:
             # Data returned is list of test_utils.BufferedPacket
@@ -337,7 +433,7 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         time.sleep(1.)
         start_time = time.time()
         rx_len_sec = 1. 
-        rx_data = self._get_received_data(start_time, rx_len_sec)
+        rx_data = self._get_received_data(start_time, rx_len_sec, self.floatSink)
         print "\nReceived Data Time Range:"
         print rx_data[0].T
         print rx_data[-1].T

@@ -34,7 +34,7 @@ program.  If not, see http://www.gnu.org/licenses/.
   </simple>
   <simple id="magnitude" mode="readwrite" type="double">
     <description>amplitude of output data</description>
-    <value>1.0</value>
+    <value>100.0</value>
     <kind kindtype="configure"/>
     <action type="external"/>
   </simple>

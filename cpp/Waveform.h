@@ -119,20 +119,22 @@ namespace Waveform{
 	 *                            cos(x+dp) = cos(x)*cos(dp) - sin(x)*sin(dp)
 	 */
 	void sincos (std::vector<float>& fbuf, double amp, double p, double dp, int n, int spa) {
-		float cxr,cxi, dxr,dxi, axr,axi;
-		cxr = (float)( amp*cos(p*TWOPI) );
-		cxi = (float)( amp*sin(p*TWOPI) );
-		dxr = (float)( cos(dp*TWOPI) );
-		dxi = (float)( sin(dp*TWOPI) );
+		double cxr,cxi, dxr,dxi, axr,axi;
+		if (spa>0) {
+			cxr = amp*cos(p*TWOPI);
+			cxi = amp*sin(p*TWOPI);
+			dxr = cos(dp*TWOPI);
+			dxi = sin(dp*TWOPI);
+		}
 		if (spa==2) for (int i=0; i<n*2;) {
-			fbuf[i++]=cxr;
-			fbuf[i++]=cxi;
+			fbuf[i++]= (float)cxr;
+			fbuf[i++]= (float)cxi;
 			axr = (cxr*dxr - cxi*dxi);
 			axi = (cxr*dxi + cxi*dxr);
 			cxr=axr; cxi=axi;
 		}
 		else if (spa==1) for (int i=0; i<n;) {
-			fbuf[i++]=cxi;
+			fbuf[i++]= (float)cxi;
 			axr = (cxr*dxr - cxi*dxi);
 			axi = (cxr*dxi + cxi*dxr);
 			cxr=axr; cxi=axi;

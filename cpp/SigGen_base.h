@@ -52,7 +52,8 @@ class SigGen_base : public Resource_impl, protected ThreadedComponent
         bool sri_blocking;
 
         // Ports
-        bulkio::OutDoublePort *out;
+        bulkio::OutFloatPort *dataFloat_out;
+        bulkio::OutShortPort *dataShort_out;
 
     private:
 };

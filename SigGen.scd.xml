@@ -28,7 +28,10 @@ program.  If not, see http://www.gnu.org/licenses/.
     <supportsinterface repid="IDL:CF/PropertySet:1.0" supportsname="PropertySet"/>
     <supportsinterface repid="IDL:CF/TestableObject:1.0" supportsname="TestableObject"/>
     <ports>
-      <uses repid="IDL:BULKIO/dataDouble:1.0" usesname="out">
+      <uses repid="IDL:BULKIO/dataFloat:1.0" usesname="dataFloat_out">
+        <porttype type="data"/>
+      </uses>
+      <uses repid="IDL:BULKIO/dataShort:1.0" usesname="dataShort_out">
         <porttype type="data"/>
       </uses>
     </ports>
@@ -46,7 +49,11 @@ program.  If not, see http://www.gnu.org/licenses/.
     <interface name="TestableObject" repid="IDL:CF/TestableObject:1.0"/>
     <interface name="ProvidesPortStatisticsProvider" repid="IDL:BULKIO/ProvidesPortStatisticsProvider:1.0"/>
     <interface name="updateSRI" repid="IDL:BULKIO/updateSRI:1.0"/>
-    <interface name="dataDouble" repid="IDL:BULKIO/dataDouble:1.0">
+    <interface name="dataFloat" repid="IDL:BULKIO/dataFloat:1.0">
+      <inheritsinterface repid="IDL:BULKIO/ProvidesPortStatisticsProvider:1.0"/>
+      <inheritsinterface repid="IDL:BULKIO/updateSRI:1.0"/>
+    </interface>
+    <interface name="dataShort" repid="IDL:BULKIO/dataShort:1.0">
       <inheritsinterface repid="IDL:BULKIO/ProvidesPortStatisticsProvider:1.0"/>
       <inheritsinterface repid="IDL:BULKIO/updateSRI:1.0"/>
     </interface>

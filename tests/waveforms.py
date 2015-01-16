@@ -20,6 +20,11 @@ import math
 TWOPI = math.pi * 2.0
 
 class Waveforms(object):
+    # Binary variant of a Giga. Note that this differs from the typical version
+    # (the decimal) version of Giga which is 10^9
+    # Value: = 1G = 2^30
+    B1G  = 1073741824.
+
     def generate_sine(self, amp, n, p=0, dp=0, spa=1):
         outbuff = range(n*spa)
         cxr=0.0; cxi=0.0; dxr=0.0; dxi=0.0; axr=0.0; axi=0.0;
@@ -38,7 +43,7 @@ class Waveforms(object):
     def generate_lrs(self, magnitude, n, spa=1, lrs=1):
         outbuff = range(n*spa)
         data = 0.0
-        factor = float(magnitude/2.**31)
+        factor = float(magnitude/2./self.B1G)
         for i in range(0, n*spa, spa):
             data = factor * lrs
             bit0 = (~(lrs ^ (lrs>>1) ^  (lrs>>5) ^ (lrs>>25)))&0x1

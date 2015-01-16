@@ -35,9 +35,13 @@ SigGen_i::SigGen_i(const char *uuid, const char *label) :
     SigGen_base(uuid, label)
 {
 	last_xfer_len = xfer_len;
-	data.resize(last_xfer_len);
+	floatData.resize(last_xfer_len);
+	shortData.resize(last_xfer_len);
 	phase = 0;
 	chirp = 0;
+	sample_time_delta = 0.0;
+	delta_phase = 0.0;
+	delta_phase_offset = 0.0;
 
 	sri = BULKIO::StreamSRI();
 	sri.hversion = 1;
@@ -213,9 +217,10 @@ int SigGen_i::serviceFunction()
 		sri.streamID = stream_id.c_str();
 	}
 
-	if ((xfer_len != last_xfer_len) || ((size_t) xfer_len != data.size())) {
+	if ((xfer_len != last_xfer_len) || ((size_t) xfer_len != floatData.size())) {
 		last_xfer_len = xfer_len;
-		data.resize(last_xfer_len);
+		floatData.resize(last_xfer_len);
+		shortData.resize(last_xfer_len);
 		sriUpdate = true;
 	}
 
@@ -224,10 +229,15 @@ int SigGen_i::serviceFunction()
 		sri.xdelta = sample_time_delta;
 		sriUpdate = true;
 	}
-
-	if (sriUpdate || !out->getCurrentSRI().count(stream_id)) {
-		out->pushSRI(sri);
+	if (sriUpdate) {
 		sriUpdate = false;
+		dataFloat_out->pushSRI(sri);
+		dataShort_out->pushSRI(sri);
+	} else {
+		if (!dataFloat_out->getCurrentSRI().count(stream_id))
+			dataFloat_out->pushSRI(sri);
+		if (!dataShort_out->getCurrentSRI().count(stream_id))
+			dataShort_out->pushSRI(sri);
 	}
 
 	delta_phase = frequency * sample_time_delta;
@@ -238,28 +248,34 @@ int SigGen_i::serviceFunction()
 
 	// Generate the Waveform
 	if (shape == "sine"){
-		Waveform::sincos(data, magnitude, phase, delta_phase, last_xfer_len, 1);
+		Waveform::sincos(floatData, magnitude, phase, delta_phase, last_xfer_len, 1);
 	} else if (shape == "square"){
-		Waveform::square(data, magnitude, phase, delta_phase, last_xfer_len, 1);
+		Waveform::square(floatData, magnitude, phase, delta_phase, last_xfer_len, 1);
 	} else if (shape == "triangle") {
-		Waveform::triangle(data, magnitude, phase, delta_phase, last_xfer_len, 1);
+		Waveform::triangle(floatData, magnitude, phase, delta_phase, last_xfer_len, 1);
 	} else if (shape == "sawtooth") {
-		Waveform::sawtooth(data, magnitude, phase, delta_phase, last_xfer_len, 1);
+		Waveform::sawtooth(floatData, magnitude, phase, delta_phase, last_xfer_len, 1);
 	} else if (shape == "pulse") {
-		Waveform::pulse(data, magnitude, phase, delta_phase, last_xfer_len, 1);
+		Waveform::pulse(floatData, magnitude, phase, delta_phase, last_xfer_len, 1);
 	} else if (shape == "constant") {
-		Waveform::constant(data, magnitude, last_xfer_len, 1);
+		Waveform::constant(floatData, magnitude, last_xfer_len, 1);
 	} else if (shape == "whitenoise") {
-		Waveform::whitenoise(data, magnitude, last_xfer_len, 1);
+		Waveform::whitenoise(floatData, magnitude, last_xfer_len, 1);
 	} else if (shape == "lrs") {
-		Waveform::lrs(data, magnitude, last_xfer_len, 1, 1);
+		Waveform::lrs(floatData, magnitude, last_xfer_len, 1, 1);
 	}
 
 	phase += delta_phase * last_xfer_len; // increment phase
 	phase -= floor(phase); // modulo 1.0
 
 	// Push the data
-	out->pushPacket(data, nextTime, false, stream_id);
+	if (dataFloat_out->isActive()) {
+		dataFloat_out->pushPacket(floatData, nextTime, false, stream_id);
+	}
+	if (dataShort_out->isActive()) {
+		convertFloat2short(floatData, shortData);
+		dataShort_out->pushPacket(shortData, nextTime, false, stream_id);
+	}
 
 	// Advance time
 	nextTime.tfsec += last_xfer_len * sri.xdelta;
@@ -279,6 +295,16 @@ int SigGen_i::serviceFunction()
 	}
 
 	return NORMAL;
+}
+
+// Convert the float vector of data to a scaled short vector
+void SigGen_i::convertFloat2short(std::vector<float>& src, std::vector<short>& dst) {
+	int minShort = std::numeric_limits<short>::min();
+	int maxShort = std::numeric_limits<short>::max();
+
+	for (int i = 0; i < (int)dst.size(); i++ ) {
+		dst[i] = (short)std::min(maxShort, std::max(minShort, (int)src[i]));
+	}
 }
 
 // Property Change Listeners

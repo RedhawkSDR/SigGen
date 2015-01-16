@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 #
-#
 # This file is protected by Copyright. Please refer to the COPYRIGHT file distributed with this 
 # source distribution.
 # 
@@ -50,7 +49,8 @@ class SigGen_base(CF__POA.Resource, Resource, ThreadedComponent):
             # in future releases
             self.auto_start = False
             # Instantiate the default implementations for all ports on this component
-            self.port_out = bulkio.OutDoublePort("out")
+            self.port_dataFloat_out = bulkio.OutFloatPort("dataFloat_out")
+            self.port_dataShort_out = bulkio.OutShortPort("dataShort_out")
 
         def start(self):
             Resource.start(self)
@@ -74,9 +74,13 @@ class SigGen_base(CF__POA.Resource, Resource, ThreadedComponent):
         # DO NOT ADD NEW PORTS HERE.  You can add ports in your derived class, in the SCD xml file, 
         # or via the IDE.
 
-        port_out = usesport(name="out",
-                            repid="IDL:BULKIO/dataDouble:1.0",
-                            type_="data")
+        port_dataFloat_out = usesport(name="dataFloat_out",
+                                      repid="IDL:BULKIO/dataFloat:1.0",
+                                      type_="data")
+
+        port_dataShort_out = usesport(name="dataShort_out",
+                                      repid="IDL:BULKIO/dataShort:1.0",
+                                      type_="data")
 
         ######################################################################
         # PROPERTIES
@@ -101,7 +105,7 @@ class SigGen_base(CF__POA.Resource, Resource, ThreadedComponent):
         
         magnitude = simple_property(id_="magnitude",
                                     type_="double",
-                                    defvalue=1.0,
+                                    defvalue=100.0,
                                     mode="readwrite",
                                     action="external",
                                     kinds=("configure",),

@@ -33,14 +33,18 @@ SigGen_base::SigGen_base(const char *uuid, const char *label) :
 {
     loadProperties();
 
-    out = new bulkio::OutDoublePort("out");
-    addPort("out", out);
+    dataFloat_out = new bulkio::OutFloatPort("dataFloat_out");
+    addPort("dataFloat_out", dataFloat_out);
+    dataShort_out = new bulkio::OutShortPort("dataShort_out");
+    addPort("dataShort_out", dataShort_out);
 }
 
 SigGen_base::~SigGen_base()
 {
-    delete out;
-    out = 0;
+    delete dataFloat_out;
+    dataFloat_out = 0;
+    delete dataShort_out;
+    dataShort_out = 0;
 }
 
 /*******************************************************************************************
@@ -94,7 +98,7 @@ void SigGen_base::loadProperties()
                 "configure");
 
     addProperty(magnitude,
-                1.0,
+                100.0,
                 "magnitude",
                 "",
                 "readwrite",

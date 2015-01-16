@@ -26,6 +26,8 @@ import math
 from bulkio.bulkioInterfaces import BULKIO, BULKIO__POA 
 import Waveform
 from omniORB import any
+from array import array
+import numpy as np
 
 from SigGen_base import *
 
@@ -92,7 +94,7 @@ class SigGen_i(SigGen_base):
             self.sri.xdelta = self.sample_time_delta
             self.sriUpdate = True
             
-        if self.sriUpdate or not self.port_out.sriDict.has_key(self.stream_id):
+        if self.sriUpdate or not self.port_dataFloat_out.sriDict.has_key(self.stream_id):
             self.sriUpdate = False
             keywords = []
             if self.chan_rf != -1:
@@ -100,7 +102,8 @@ class SigGen_i(SigGen_base):
             if self.col_rf != -1:
                 keywords.append(CF.DataType('COL_RF', any.to_any(self.col_rf)))
             self.sri.keywords = keywords
-            self.port_out.pushSRI(self.sri)
+            self.port_dataFloat_out.pushSRI(self.sri)
+            self.port_dataShort_out.pushSRI(self.sri)
             
         self.delta_phase = self.frequency * self.sample_time_delta
         self.delta_phase_offset = self.chirp * self.sample_time_delta * self.sample_time_delta
@@ -132,8 +135,10 @@ class SigGen_i(SigGen_base):
         self.phase -= math.floor(self.phase) # module 1.0
         
         # Push the data
-        self.port_out.pushPacket(data, self.next_time, False, self.stream_id)
-
+        self.port_dataFloat_out.pushPacket(data, self.next_time, False, self.stream_id)
+        self.port_dataShort_out.pushPacket(self.convert_float_2_short(data), 
+                                           self.next_time, False, self.stream_id)
+        
         # Advance time
         self.next_time.tfsec += self.last_xfer_len * self.sri.xdelta
         if self.next_time.tfsec > 1.0:
@@ -150,6 +155,16 @@ class SigGen_i(SigGen_base):
             
         return NORMAL
     
+    def convert_float_2_short(self, data):
+        shortData = array("h")
+        shortMin = np.iinfo(np.int16).min
+        shortMax = np.iinfo(np.int16).max
+                
+        for i in range(len(data)):
+            shortData.append(np.int16(min(shortMax, max(shortMin, np.float32(data[i])))))
+             
+        return shortData.tolist()
+        
     def prop_update_sri(self, propid, oldval, newval):
         self.sri.streamID = self.stream_id
         self.sriUpdate = True
@@ -160,7 +175,7 @@ class SigGen_i(SigGen_base):
     def prop_update_sri3(self, propid, oldval, newval):
         self.sriUpdate = True
 
-    # Checking for changes to the SRI Blocking property
+    # Check for changes to the SRI Blocking property
     def prop_update_sri_blocking(self, propid, oldval, newval):
         if newval != None:
             self.sri.blocking = newval
