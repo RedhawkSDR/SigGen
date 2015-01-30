@@ -55,10 +55,6 @@ class Waveform:
     # @param spa  Scalars per atom, 2 for Complex
     # @return the new data buffer
     def whitenoise(self, sdev, n, spa=1):
-        # When odd number of elements, reduce by one to avoid referencing array element
-        # that is out of bounds in outbuff[i+1]
-        if (n % 2) == 1:
-            n -= 1
         outbuff = range(n*spa)
         v1 = 0.0; v2 = 0.0; sum1 = 0.0
         fdev = float(sdev)
@@ -85,7 +81,8 @@ class Waveform:
             if sum1 >= 1.0 or sum1 <1e-20: continue
             sum1 = fdev * float(math.sqrt(factor*math.log(sum1)/sum1))
             outbuff[i] = v1*sum1
-            outbuff[i+1] = v2*sum1
+            if (i+1) < maxIndex:
+                outbuff[i+1] = v2*sum1
             i+=2
         
         self.seed = int(sis*self.T26)

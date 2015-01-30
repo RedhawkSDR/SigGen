@@ -71,7 +71,9 @@ namespace Waveform{
 			sum = fdev * (float)sqrt(factor*log(sum)/sum);
 			//      sum = fdev * Native.sqrtf(factor*Native.logf(sum)/sum);
 			fbuf[i++] = v1*sum;
-			fbuf[i++] = v2*sum;
+			if(i<n*spa){
+				fbuf[i++] = v2*sum;
+			}
 		}
 		seed = (int)(sis*T26);
 	}
@@ -97,7 +99,9 @@ namespace Waveform{
 			if (sum>=1.0) continue;
 			sum = sdev * sqrt(factor*log(sum)/sum);
 			dbuf[i++] = v1*sum;
-			dbuf[i++] = v2*sum;
+			if(i<n*spa){
+				dbuf[i++] = v2*sum;
+			}
 		}
 		seed = (int)(sis*T26);
 	}
