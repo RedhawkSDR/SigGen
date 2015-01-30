@@ -316,14 +316,9 @@ public class SigGen extends SigGen_base {
 			phase -= Math.floor(phase); // modulo 1.0
 
 			// Push the data
-			if (this.port_dataFloat_out.isActive()) {
-				this.port_dataFloat_out.pushPacket(floatData, this.nextTime, false, sri.streamID);
-			}
-			
-			if (this.port_dataShort_out.isActive()) {
-				convertFloat2short(floatData, shortData);
-				this.port_dataShort_out.pushPacket(shortData, this.nextTime, false, sri.streamID);
-			}
+			this.port_dataFloat_out.pushPacket(floatData, this.nextTime, false, sri.streamID);
+			convertFloat2short(floatData, shortData);
+			this.port_dataShort_out.pushPacket(shortData, this.nextTime, false, sri.streamID);
 			
 			// Advance time
 			this.nextTime.tfsec += floatData.length * sri.xdelta;

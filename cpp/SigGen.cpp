@@ -269,13 +269,9 @@ int SigGen_i::serviceFunction()
 	phase -= floor(phase); // modulo 1.0
 
 	// Push the data
-	if (dataFloat_out->isActive()) {
-		dataFloat_out->pushPacket(floatData, nextTime, false, stream_id);
-	}
-	if (dataShort_out->isActive()) {
-		convertFloat2short(floatData, shortData);
-		dataShort_out->pushPacket(shortData, nextTime, false, stream_id);
-	}
+	dataFloat_out->pushPacket(floatData, nextTime, false, stream_id);
+	convertFloat2short(floatData, shortData);
+	dataShort_out->pushPacket(shortData, nextTime, false, stream_id);
 
 	// Advance time
 	nextTime.tfsec += last_xfer_len * sri.xdelta;
