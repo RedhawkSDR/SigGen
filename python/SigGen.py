@@ -94,7 +94,7 @@ class SigGen_i(SigGen_base):
             self.sri.xdelta = self.sample_time_delta
             self.sriUpdate = True
             
-        if self.sriUpdate or not self.port_dataFloat_out.sriDict.has_key(self.stream_id):
+        if self.sriUpdate or not self.port_dataFloat_out.sriDict.has_key(self.stream_id) or not self.port_dataShort_out.sriDict.has_key(self.stream_id):
             self.sriUpdate = False
             keywords = []
             if self.chan_rf != -1:
