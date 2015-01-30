@@ -40,10 +40,10 @@ import CF.ResourcePackage.StartError;
  * Source: SigGen.spd.xml
  */
 public class SigGen extends SigGen_base {
-	float[] floatData = new float[this.xfer_len.getValue()];
-	short[] shortData = new short[this.xfer_len.getValue()];
-	double phase = 0;
-	double chirp = 0;
+	float[] floatData;
+	short[] shortData;
+	double phase;
+	double chirp;
 	double delta_phase;
 	double delta_phase_offset;
 	
@@ -80,6 +80,12 @@ public class SigGen extends SigGen_base {
      */
     public SigGen() {
         super();
+    	floatData = new float[this.xfer_len.getValue()];
+    	shortData = new short[this.xfer_len.getValue()];
+    	phase = 0;
+    	chirp = 0;
+    	delta_phase = 0;
+    	delta_phase_offset = 0;
         
         sri = new StreamSRI();
         sri.hversion = 1;
@@ -122,7 +128,8 @@ public class SigGen extends SigGen_base {
     
     public boolean hasSri(String streamID)
 	{
-		return Arrays.asList(port_dataFloat_out.activeSRIs()).contains(streamID);
+		boolean retval = Arrays.asList(port_dataFloat_out.activeSRIs()).contains(streamID);
+		return retval && Arrays.asList(port_dataShort_out.activeSRIs()).contains(streamID);
 	}
 
     @Override
@@ -243,7 +250,7 @@ public class SigGen extends SigGen_base {
     
     protected int serviceFunction() {
 			/// If the transfer length has changed, reallocate the buffer
-			if (this.xfer_len.getValue() != floatData.length) {
+			if (this.xfer_len.getValue() != floatData.length || this.xfer_len.getValue() != shortData.length) {
 				floatData = new float[this.xfer_len.getValue()];
 				shortData = new short[this.xfer_len.getValue()];
 				sriUpdate = true;

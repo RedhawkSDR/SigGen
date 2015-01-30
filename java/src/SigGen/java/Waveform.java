@@ -121,25 +121,22 @@ public class Waveform {
    *                            cos(x+dp) = cos(x)*cos(dp) - sin(x)*sin(dp)
    */
   public static void sincos (float[] fbuf, double amp, double p, double dp, int n, int spa) {
-
-    double cxr=0.0, cxi=0.0, dxr=0.0, dxi=0.0, axr,axi;
-    
-    if (spa > 0) {
-	    cxr = amp*Math.cos(p*TWOPI);
-	    cxi = amp*Math.sin(p*TWOPI);
-	    dxr = Math.cos(dp*TWOPI);
-	    dxi = Math.sin(dp*TWOPI);
+    float cxr=0,cxi=0, dxr=0,dxi=0, axr,axi;
+    if (spa>0) { // NTN 2009-12-16: only need to calculate below variables when spa>0
+      cxr = (float) ( amp*Math.cos(p*TWOPI) );
+      cxi = (float) ( amp*Math.sin(p*TWOPI) );
+      dxr = (float) ( Math.cos(dp*TWOPI) );
+      dxi =(float) (  Math.sin(dp*TWOPI) );
     }
-    
     if (spa==2) for (int i=0; i<n*2;) {
-      fbuf[i++]=(float)cxr;
-      fbuf[i++]= (float)cxi;
+      fbuf[i++]=cxr;
+      fbuf[i++]=cxi;
       axr = (cxr*dxr - cxi*dxi);
       axi = (cxr*dxi + cxi*dxr);
       cxr=axr; cxi=axi;
     }
     else if (spa==1) for (int i=0; i<n;) {
-      fbuf[i++]= (float)cxi;
+      fbuf[i++]=cxi;
       axr = (cxr*dxr - cxi*dxi);
       axi = (cxr*dxi + cxi*dxr);
       cxr=axr; cxi=axi;
@@ -288,12 +285,12 @@ public class Waveform {
       @param spa  Scalars per atom, 2 for Complex
   */
    public static void sawtooth (float[] fbuf, double amp, double p, double dp, int n, int spa) {
-    double value, famp2 = 2*amp;
+    float value, famp2 = 2*(float)amp;
     double fp = (p-0.5); // This needs to be in double precision for phase accuracy
     for (int i=0; i<n*spa; ) {
       if (fp>=0.5) fp -= 1.0;
-      value = fp*famp2;
-      fbuf[i++] = (float)value; if (spa==2) fbuf[i++] = (float)value;
+      value = (float)fp*famp2;
+      fbuf[i++] = value; if (spa==2) fbuf[i++] = value;
       fp += dp;
     }
   }
@@ -387,8 +384,8 @@ public class Waveform {
       int bit0 = (~(lrs ^ (lrs>>1) ^  (lrs>>5) ^ (lrs>>25)))&0x1;
       lrs <<= 1;
       lrs |= bit0;
+      if (spa==2) fbuf[i++] = data;
       fbuf[i] = data;
-      if (spa==2) fbuf[i+1] = data;
     }
     return lrs;
   }
