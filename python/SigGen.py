@@ -64,7 +64,6 @@ class SigGen_i(SigGen_base):
         self.addPropertyChangeListener("stream_id", self.prop_update_sri)
         self.addPropertyChangeListener("chan_rf", self.prop_update_sri2)
         self.addPropertyChangeListener("col_rf", self.prop_update_sri3)
-        # Adding SRI Blocking property listener
         self.addPropertyChangeListener("sri_blocking", self.prop_update_sri_blocking)
 
     def start(self):

@@ -49,15 +49,14 @@ SigGen_i::SigGen_i(const char *uuid, const char *label) :
 	sri.ydelta = 0.0;
 	sri.yunits = BULKIO::UNITS_NONE;
 	sri.mode = 0;
-	sri.blocking = this->sri_blocking;
-	sri.streamID = this->stream_id.c_str();
-	this->keywordUpdate(NULL, NULL);
+	sri.blocking = sri_blocking;
+	sri.streamID = stream_id.c_str();
+	keywordUpdate(NULL, NULL);
 	sriUpdate = true;
 
 	addPropertyChangeListener("stream_id", this, &SigGen_i::stream_idChanged);
 	addPropertyChangeListener("chan_rf", this, &SigGen_i::keywordUpdate);
 	addPropertyChangeListener("col_rf", this, &SigGen_i::keywordUpdate);
-	// Add property change listener for sri_blocking property
 	addPropertyChangeListener("sri_blocking", this, &SigGen_i::sri_blockingChanged);
 
 }
@@ -323,7 +322,6 @@ void SigGen_i::keywordUpdate(const double *oldValue, const double *newValue)
 void SigGen_i::sri_blockingChanged(const bool *oldValue, const bool *newValue)
 {
 	boost::mutex::scoped_lock lock(sigGenLock_);
-
-	sri.blocking = *newValue;
+	sri.blocking = sri_blocking;
 	sriUpdate = true;
 }

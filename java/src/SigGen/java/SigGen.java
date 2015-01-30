@@ -114,7 +114,6 @@ public class SigGen extends SigGen_base {
 		this.chan_rf.addChangeListener(keywordUpdate);
 		this.col_rf.addChangeListener(keywordUpdate);
 		
-		// SRI Blocking property change listener
 		this.sri_blocking.addChangeListener(new PropertyListener<Boolean>() {
 			public void valueChanged(Boolean oldValue, Boolean newValue) {
 				sri.blocking = (newValue != null) ? newValue : (oldValue != null) ? oldValue : false;

@@ -37,7 +37,6 @@ class SigGen_i : public SigGen_base
 
         void stream_idChanged(const std::string *oldValue, const std::string *newValue);
         void keywordUpdate(const double *oldValue, const double *newValue);
-        // Update sri_blocking property
         void sri_blockingChanged(const bool *oldValue, const bool *newValue);
 
     	std::vector<double> data;
