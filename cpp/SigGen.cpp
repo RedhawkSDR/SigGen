@@ -226,7 +226,7 @@ int SigGen_i::serviceFunction()
 		sriUpdate = true;
 	}
 
-	if (sriUpdate) {
+	if (sriUpdate || !out->getCurrentSRI().count(stream_id)) {
 		out->pushSRI(sri);
 		sriUpdate = false;
 	}
