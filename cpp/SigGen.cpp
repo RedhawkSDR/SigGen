@@ -217,7 +217,7 @@ int SigGen_i::serviceFunction()
 		sri.streamID = stream_id.c_str();
 	}
 
-	if ((xfer_len != last_xfer_len) || ((size_t) xfer_len != floatData.size())) {
+	if ((xfer_len != last_xfer_len) || ((size_t) xfer_len != floatData.size()) || ((size_t) xfer_len != shortData.size())) {
 		last_xfer_len = xfer_len;
 		floatData.resize(last_xfer_len);
 		shortData.resize(last_xfer_len);
