@@ -251,8 +251,7 @@ public class SigGen extends SigGen_base {
 				sriUpdate = true;
 			}
 
-			// Only push Sri if there has been an update or Sri is available
-			if (sriUpdate || (hasSri(stream_id.getValue()))) {
+			if (sriUpdate || (!hasSri(stream_id.getValue()))) {
 				
 				// Reset the flag first (in case other updates to props occur while we're in here)
 				sriUpdate = false;
