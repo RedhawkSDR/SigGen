@@ -28,6 +28,7 @@ Waveform class produces the following types of waveforms:
  - ramp
 '''
 import math
+import numpy as np
 
 class Waveform:
     A = 67081293.0
@@ -102,34 +103,33 @@ class Waveform:
     #                           cos(x+dp) = cos(x)*cos(dp) - sin(x)*sin(dp)
     def sincos(self, amp, p, dp, n, spa):
         outbuff = range(n*spa)
-        cxr=0.0; cxi=0.0; dxr=0.0; dxi=0.0; axr=0.0; axi=0.0;
-        cxr = float(amp*math.cos(p*self.TWOPI))
-        cxi = float(amp*math.sin(p*self.TWOPI))
-        dxr = float(math.cos(dp*self.TWOPI))
-        dxi = float(math.sin(dp*self.TWOPI))
+        cxr = np.float32(amp*math.cos(p*self.TWOPI))
+        cxi = np.float32(amp*math.sin(p*self.TWOPI))
+        dxr = np.float32(math.cos(dp*self.TWOPI))
+        dxi = np.float32(math.sin(dp*self.TWOPI))
         if spa==2:
             for i in range(0, n*2, 2):
-                outbuff[i] = cxr
-                outbuff[i+1] = cxi
-                axr = (cxr*dxr - cxi*dxi)
-                axi = (cxr*dxi + cxi*dxr)
+                outbuff[i] = float(cxr)
+                outbuff[i+1] = float(cxi)
+                axr = np.float32(np.float32(cxr*dxr) - np.float32(cxi*dxi))
+                axi = np.float32(np.float32(cxr*dxi) + np.float32(cxi*dxr))
                 cxr=axr 
                 cxi=axi
         elif spa==1:
             for i in range(n):
-                outbuff[i] = cxi
-                axr = (cxr*dxr - cxi*dxi)
-                axi = (cxr*dxi + cxi*dxr)
+                outbuff[i] = float(cxi)
+                axr = np.float32(np.float32(cxr*dxr) - np.float32(cxi*dxi))
+                axi = np.float32(np.float32(cxr*dxi) + np.float32(cxi*dxr))
                 cxr=axr
                 cxi=axi
         elif spa==-1:
             for i in range(n):
-                outbuff[i] = float(amp*math.sin(p*self.TWOPI))
+                outbuff[i] = float(np.float32(amp*math.sin(p*self.TWOPI)))
                 p += dp
         elif spa==-2:
             for i in range(0, n*2, 2):
-                outbuff[i] = float(amp*math.cos(p*self.TWOPI))
-                outbuff[i+1] = float(amp*math.sin(p*self.TWOPI))
+                outbuff[i] = float(np.float32(amp*math.cos(p*self.TWOPI)))
+                outbuff[i+1] = float(np.float32(amp*math.sin(p*self.TWOPI)))
                 p += dp
                 
         return outbuff
@@ -265,11 +265,14 @@ class Waveform:
     # @return the new data buffer and the LRS at end of array
     def lrs(self, amp, n, spa, lrs):
         outbuff = range(n*spa)
-        data = 0.0
-        factor = float(amp/2./self.B1G)
+        factor = np.float32(amp/2.0/self.B1G)
         
         for i in range(0, n*spa, spa):
-            data = factor * lrs
+            data = np.float32(factor * np.float32(lrs))
+            outbuff[i] = float(data)
+            if spa == 2:
+                outbuff[i+1] = float(data)
+                
             bit0 = (~(lrs ^ (lrs>>1) ^  (lrs>>5) ^ (lrs>>25)))&0x1
             lrs <<= 1
             lrs |= bit0
@@ -278,10 +281,6 @@ class Waveform:
             if lrs >= 2**31 -1:
                 lrs &= 0x7fffffff
                 lrs -= 2**31
-                
-            outbuff[i] = data
-            if spa == 2:
-                outbuff[i+1] = data
                 
         return outbuff
     
