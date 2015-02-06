@@ -16,6 +16,8 @@
 # program.  If not, see http://www.gnu.org/licenses/.
 #
 import math
+import numpy as np
+from array import array
 
 TWOPI = math.pi * 2.0
 
@@ -27,25 +29,27 @@ class Waveforms(object):
 
     def generate_sine(self, amp, n, p=0, dp=0, spa=1):
         outbuff = range(n*spa)
-        cxr=0.0; cxi=0.0; dxr=0.0; dxi=0.0; axr=0.0; axi=0.0;
-        cxr = float(amp*math.cos(p*TWOPI))
-        cxi = float(amp*math.sin(p*TWOPI))
-        dxr = float(math.cos(dp*TWOPI))
-        dxi = float(math.sin(dp*TWOPI))
+        cxr = np.float32(amp*math.cos(p*TWOPI))
+        cxi = np.float32(amp*math.sin(p*TWOPI))
+        dxr = np.float32(math.cos(dp*TWOPI))
+        dxi = np.float32(math.sin(dp*TWOPI))
         for i in range(n):
             outbuff[i] = cxi
-            axr = (cxr*dxr - cxi*dxi)
-            axi = (cxr*dxi + cxi*dxr)
+            axr = np.float32(np.float32(cxr*dxr) - np.float32(cxi*dxi))
+            axi = np.float32(np.float32(cxr*dxi) + np.float32(cxi*dxr))
             cxr=axr
             cxi=axi
         return outbuff
     
     def generate_lrs(self, magnitude, n, spa=1, lrs=1):
         outbuff = range(n*spa)
-        data = 0.0
-        factor = float(magnitude/2./self.B1G)
+        factor = np.float32(magnitude/2.0/self.B1G)
         for i in range(0, n*spa, spa):
-            data = factor * lrs
+            data = np.float32(factor * np.float32(lrs))
+            outbuff[i] = data
+            if spa == 2:
+                outbuff[i+1] = data
+                
             bit0 = (~(lrs ^ (lrs>>1) ^  (lrs>>5) ^ (lrs>>25)))&0x1
             lrs <<= 1
             lrs |= bit0
@@ -54,10 +58,6 @@ class Waveforms(object):
             if lrs >= 2**31 -1:
                 lrs &= 0x7fffffff
                 lrs -= 2**31
-
-            outbuff[i] = data
-            if spa == 2:
-                outbuff[i+1] = data
         return outbuff
     
     def generate_square(self, amp, n, p=0, dp=0, spa=1):
