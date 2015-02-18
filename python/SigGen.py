@@ -136,7 +136,10 @@ class SigGen_i(SigGen_base):
         
         # Push the data
         self.port_dataFloat_out.pushPacket(data, self.next_time, False, self.stream_id)
-        self.port_dataShort_out.pushPacket(self.convert_float_2_short(data), 
+        
+        # Only convert and push short data if the port is connected
+        if self.port_dataShort_out._get_state() == BULKIO.ACTIVE:
+            self.port_dataShort_out.pushPacket(self.convert_float_2_short(data), 
                                            self.next_time, False, self.stream_id)
         
         # Advance time
