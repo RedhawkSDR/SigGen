@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # This file is protected by Copyright. Please refer to the COPYRIGHT file distributed with this 
 # source distribution.
@@ -19,22 +19,34 @@
 
 if [ "$1" = "rpm" ]; then
     # A very simplistic RPM build scenario
-    if [ -e SigGen.spec ]; then
+    if [ -e rh.SigGen.spec ]; then
         mydir=`dirname $0`
         tmpdir=`mktemp -d`
-        cp -r ${mydir} ${tmpdir}/SigGen-2.0.0
-        tar czf ${tmpdir}/SigGen-2.0.0.tar.gz --exclude=".svn" -C ${tmpdir} SigGen-2.0.0
-        rpmbuild -ta ${tmpdir}/SigGen-2.0.0.tar.gz
+        cp -r ${mydir} ${tmpdir}/rh.SigGen-2.0.0
+        tar czf ${tmpdir}/rh.SigGen-2.0.0.tar.gz --exclude=".svn" -C ${tmpdir} rh.SigGen-2.0.0
+        rpmbuild -ta ${tmpdir}/rh.SigGen-2.0.0.tar.gz
         rm -rf $tmpdir
     else
         echo "Missing RPM spec file in" `pwd`
         exit 1
     fi
 else
-    for impl in python cpp java ; do
+    for impl in cpp python java ; do
         cd $impl
         if [ -e build.sh ]; then
-            ./build.sh $*
+            if [ $# == 1 ]; then
+                if [ $1 == 'clean' ]; then
+                    rm -f Makefile
+                    rm -f config.*
+                    ./build.sh distclean
+                else
+                    ./build.sh $*
+                fi
+            else
+                ./build.sh $*
+            fi
+        elif [ -e Makefile ] && [ Makefile.am -ot Makefile ]; then
+            make $*
         elif [ -e reconf ]; then
             ./reconf && ./configure && make $*
         else

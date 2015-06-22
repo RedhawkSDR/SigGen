@@ -27,7 +27,7 @@ Prefix:         %{_prefix}
 %define _mandir        %{_prefix}/man
 %define _infodir       %{_prefix}/info
 
-Name:           SigGen
+Name:           rh.SigGen
 Version:        2.0.0
 Release:        1%{?dist}
 Summary:        Component %{name}
@@ -44,6 +44,10 @@ Requires:       redhawk >= 1.10
 BuildRequires:  bulkioInterfaces
 Requires:       bulkioInterfaces
 
+# Implementation java
+BuildRequires:  java-devel >= 1.6
+Requires:       java >= 1.6
+
 %description
 Component %{name}
  * Commit: __REVISION__
@@ -55,24 +59,24 @@ Component %{name}
 
 
 %build
-# Implementation python
-pushd python
-./reconf
-%define _bindir %{_prefix}/dom/components/SigGen/python
-%configure
-make %{?_smp_mflags}
-popd
 # Implementation cpp
 pushd cpp
 ./reconf
-%define _bindir %{_prefix}/dom/components/SigGen/cpp
+%define _bindir %{_prefix}/dom/components/rh/SigGen/cpp
+%configure
+make %{?_smp_mflags}
+popd
+# Implementation python
+pushd python
+./reconf
+%define _bindir %{_prefix}/dom/components/rh/SigGen/python
 %configure
 make %{?_smp_mflags}
 popd
 # Implementation java
 pushd java
 ./reconf
-%define _bindir %{_prefix}/dom/components/SigGen/java
+%define _bindir %{_prefix}/dom/components/rh/SigGen/java
 %configure
 make %{?_smp_mflags}
 popd
@@ -80,19 +84,19 @@ popd
 
 %install
 rm -rf $RPM_BUILD_ROOT
-# Implementation python
-pushd python
-%define _bindir %{_prefix}/dom/components/SigGen/python
-make install DESTDIR=$RPM_BUILD_ROOT
-popd
 # Implementation cpp
 pushd cpp
-%define _bindir %{_prefix}/dom/components/SigGen/cpp
+%define _bindir %{_prefix}/dom/components/rh/SigGen/cpp
+make install DESTDIR=$RPM_BUILD_ROOT
+popd
+# Implementation python
+pushd python
+%define _bindir %{_prefix}/dom/components/rh/SigGen/python
 make install DESTDIR=$RPM_BUILD_ROOT
 popd
 # Implementation java
 pushd java
-%define _bindir %{_prefix}/dom/components/SigGen/java
+%define _bindir %{_prefix}/dom/components/rh/SigGen/java
 make install DESTDIR=$RPM_BUILD_ROOT
 popd
 
@@ -103,11 +107,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,redhawk,redhawk,-)
-%dir %{_prefix}/dom/components/%{name}
-%{_prefix}/dom/components/%{name}/SigGen.scd.xml
-%{_prefix}/dom/components/%{name}/SigGen.prf.xml
-%{_prefix}/dom/components/%{name}/SigGen.spd.xml
-%{_prefix}/dom/components/%{name}/python
-%{_prefix}/dom/components/%{name}/cpp
-%{_prefix}/dom/components/%{name}/java
+%dir %{_prefix}/dom/components/rh/SigGen
+%{_prefix}/dom/components/rh/SigGen/SigGen.scd.xml
+%{_prefix}/dom/components/rh/SigGen/SigGen.prf.xml
+%{_prefix}/dom/components/rh/SigGen/SigGen.spd.xml
+%{_prefix}/dom/components/rh/SigGen/cpp
+%{_prefix}/dom/components/rh/SigGen/python
+%{_prefix}/dom/components/rh/SigGen/java
 

@@ -16,12 +16,13 @@
 # program.  If not, see http://www.gnu.org/licenses/.
 #
 
-SigGen_jar_CLASSPATH = $(CLASSPATH_SOFTPKG_DEP)$(OSSIE_HOME)/lib/CFInterfaces.jar:$(OSSIE_HOME)/lib/log4j-1.2.15.jar:$(OSSIE_HOME)/lib/ossie.jar:$(OSSIE_HOME)/lib/bulkio.jar:$(OSSIE_HOME)/lib/BULKIOInterfaces.jar
+SigGen_jar_CLASSPATH = $(SOFTPKG_CLASSPATH):$(REDHAWK_CLASSPATH):$(OSSIE_HOME)/lib/bulkio.jar:$(OSSIE_HOME)/lib/BULKIOInterfaces.jar
 
 SigGen.jar: $(SigGen_jar_SOURCES)
 	mkdir -p bin
-	$(JAVAC) -cp $(SigGen_jar_CLASSPATH) -d bin $(SigGen_jar_SOURCES)
+	$(JAVAC) -cp $(SigGen_jar_CLASSPATH) -g -d bin $(SigGen_jar_SOURCES)
 	$(JAR) cf ./SigGen.jar -C bin .
+	$(JAR) uf ./SigGen.jar -C src .
 
 clean-local:
 	rm -rf bin
@@ -39,13 +40,13 @@ distclean-local:
 	rm -f missing
 	rm -rf .deps
 
-ossieName = SigGen
-bindir = $(prefix)/dom/components/SigGen/java/
+ossieName = rh.SigGen
+bindir = $(prefix)/dom/components/rh/SigGen/java/
 bin_PROGRAMS = SigGen.jar
 SigGen_jar_SOURCES := $(shell find ./src -name "*.java")
 
-xmldir = $(prefix)/dom/components/SigGen/
+xmldir = $(prefix)/dom/components/rh/SigGen/
 dist_xml_DATA = ../SigGen.scd.xml ../SigGen.prf.xml ../SigGen.spd.xml
 
-domdir = $(prefix)/dom/components/SigGen/java/
+domdir = $(prefix)/dom/components/rh/SigGen/java/
 dist_dom_SCRIPTS = startJava.sh

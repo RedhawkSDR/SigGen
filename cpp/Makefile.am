@@ -16,12 +16,13 @@
 # program.  If not, see http://www.gnu.org/licenses/.
 #
 
-ossieName = SigGen
-bindir = $(prefix)/dom/components/SigGen/cpp/
+ossieName = rh.SigGen
+bindir = $(prefix)/dom/components/rh/SigGen/cpp/
 bin_PROGRAMS = SigGen
 
-xmldir = $(prefix)/dom/components/SigGen/
+xmldir = $(prefix)/dom/components/rh/SigGen/
 dist_xml_DATA = ../SigGen.scd.xml ../SigGen.prf.xml ../SigGen.spd.xml
+ACLOCAL_AMFLAGS = -I$(OSSIEHOME)/share/aclocal/ossie
 
 
 distclean-local:
@@ -43,7 +44,7 @@ distclean-local:
 # you wish to manually control these options.
 include $(srcdir)/Makefile.am.ide
 SigGen_SOURCES = $(redhawk_SOURCES_auto)
-SigGen_LDADD = $(PROJECTDEPS_LIBS) $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(INTERFACEDEPS_LIBS) $(redhawk_LDADD_auto)
-SigGen_CXXFLAGS = -Wall $(PROJECTDEPS_CFLAGS) $(BOOST_CPPFLAGS) $(INTERFACEDEPS_CFLAGS) $(redhawk_INCLUDES_auto)
+SigGen_LDADD = $(SOFTPKG_LIBS) $(PROJECTDEPS_LIBS) $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(INTERFACEDEPS_LIBS) $(redhawk_LDADD_auto)
+SigGen_CXXFLAGS = -Wall $(SOFTPKG_CFLAGS) $(PROJECTDEPS_CFLAGS) $(BOOST_CPPFLAGS) $(INTERFACEDEPS_CFLAGS) $(redhawk_INCLUDES_auto)
 SigGen_LDFLAGS = -Wall $(redhawk_LDFLAGS_auto)
 
