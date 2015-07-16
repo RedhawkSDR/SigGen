@@ -21,6 +21,6 @@ program.  If not, see http://www.gnu.org/licenses/.
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">Default</pydev_property>
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python 2.7</pydev_property>
 <pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
-<path>/SigGen/python</path>
+<path>/rh.SigGen/python</path>
 </pydev_pathproperty>
 </pydev_project>
