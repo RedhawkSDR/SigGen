@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE softpkg PUBLIC "-//JTRS//DTD SCA V2.2.2 SPD//EN" "softpkg.dtd">
 <!-- 
 This file is protected by Copyright. Please refer to the COPYRIGHT file distributed with this 
@@ -17,7 +17,7 @@ PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this 
 program.  If not, see http://www.gnu.org/licenses/.
 -->
-<softpkg id="DCE:c7dc1f48-16d3-11e5-9335-3417ebc4aab5" name="rh.SigGen" type="sca_compliant" version="2.0.0">
+<softpkg id="DCE:c7dc1f48-16d3-11e5-9335-3417ebc4aab5" name="rh.SigGen" type="2.0.0" version="2.0.0">
   <title>Signal Generator</title>
   <author>
     <name>null</name>
