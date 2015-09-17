@@ -37,12 +37,13 @@ License:        LGPLv3+
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  redhawk-devel >= 1.10
-Requires:       redhawk >= 1.10
+BuildRequires:  redhawk-devel >= 2.0
+Requires:       redhawk >= 2.0
+
 
 # Interface requirements
-BuildRequires:  bulkioInterfaces
-Requires:       bulkioInterfaces
+BuildRequires:  bulkioInterfaces >= 2.0
+Requires:       bulkioInterfaces >= 2.0
 
 # Implementation java
 BuildRequires:  java-devel >= 1.6

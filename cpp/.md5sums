@@ -1,7 +1,7 @@
 7e2e8dade5cc1aeae9de46d9cec10d54  SigGen_base.h
-c99df9fa4ab0cd042eac42fcee6441c3  reconf
+8bfcd22353c3a57fee561ad86ee2a56b  reconf
 a5866b9e6cf949ec1049966954e17ae3  SigGen_base.cpp
 2454b9955c83e76761b008b90f700548  main.cpp
-5c83269f9a03d4ccf8b4b67fa80ee44f  configure.ac
-b39f5e7531a664f49ee264b2febf850c  Makefile.am
+48be210c805a498ba07fb041b80b2909  configure.ac
+b54faf0ae6be847d47252d139217f886  Makefile.am
 b87651ea3565402473fb088004430fbf  build.sh

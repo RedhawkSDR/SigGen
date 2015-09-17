@@ -32,6 +32,10 @@ if [ "$1" = "rpm" ]; then
     fi
 else
     for impl in cpp python java ; do
+        if [ ! -d "$impl" ]; then
+            echo "Directory '$impl' does not exist...continuing"
+            continue
+        fi
         cd $impl
         if [ -e build.sh ]; then
             if [ $# == 1 ]; then

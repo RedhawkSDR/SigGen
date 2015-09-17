@@ -15,12 +15,16 @@
 # You should have received a copy of the GNU Lesser General Public License along with this 
 # program.  If not, see http://www.gnu.org/licenses/.
 #
+# vim: noet: softtabstop=0
+ACLOCAL_AMFLAGS = -I m4 -I${OSSIEHOME}/share/aclocal/ossie
+AUTOMAKE_OPTIONS = subdir-objects
 
 xmldir = $(prefix)/dom/components/rh/SigGen/
 dist_xml_DATA = ../SigGen.scd.xml ../SigGen.prf.xml ../SigGen.spd.xml
 domdir = $(prefix)/dom/components/rh/SigGen/python/
 
 distclean-local:
+	rm -rf m4
 	rm -f config.*
 	rm -rf autom4te.cache
 	rm -f acinclude.m4
