@@ -1,8 +1,8 @@
-# REDHAWK Basic Components SigGen
+# REDHAWK Basic Components rh.SigGen
  
 ## Description
 
-Contains the source and build script for the REDHAWK Basic Components SigGen. A signal generator that creates different output signals based on its configuration. It contains an implementation in each of the supported languages (Python, C++, Java) as an example of a component with multiple implementations.
+Contains the source and build script for the REDHAWK Basic Components rh.SigGen. A signal generator that creates different output signals based on its configuration. It contains an implementation in each of the supported languages (Python, C++, Java) as an example of a component with multiple implementations.
   
  
 ## Installation Instructions
@@ -14,4 +14,4 @@ This work is protected by Copyright. Please refer to the [Copyright File](COPYRI
 
 ## License
 
-REDHAWK Basic Components SigGen is licensed under the GNU Lesser General Public License (LGPL).
+REDHAWK Basic Components rh.SigGen is licensed under the GNU Lesser General Public License (LGPL).
