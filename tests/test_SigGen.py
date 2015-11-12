@@ -150,7 +150,7 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         
     def test_lrs_float(self):
         print "\n... Starting Test lrs with dataFloat_out"
-        self._test_lrs(self.floatSink, self._no_convert)
+        self._test_lrs(self.floatSink, self._convert_float_2_float32)
         
     def test_lrs_short(self):
         print "\n... Starting Test lrs with dataShort_out"
@@ -158,7 +158,7 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
     
     def test_sine_float(self):
         print "\n... Starting Test sine with dataFloat_out"
-        self._test_signal_with_phase("sine", self.floatSink, self.waveforms.generate_sine, self._no_convert)
+        self._test_signal_with_phase("sine", self.floatSink, self.waveforms.generate_sine, self._convert_float_2_float32)
     
     def test_sine_short(self):
         print "\n... Starting Test sine with dataShort_out"
@@ -166,7 +166,7 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
     
     def test_sawtooth_float(self):
         print "\n... Starting Test sawtooth with dataFloat_out"
-        self._test_signal_with_phase("sawtooth", self.floatSink, self.waveforms.generate_sawtooth, self._no_convert)
+        self._test_signal_with_phase("sawtooth", self.floatSink, self.waveforms.generate_sawtooth, self._convert_float_2_float32)
     
     def test_sawtooth_short(self):
         print "\n... Starting Test sawtooth with dataShort_out"
@@ -174,7 +174,7 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
     
     def test_square_float(self):
         print "\n... Starting Test square with dataFloat_out"
-        self._test_signal_with_phase("square", self.floatSink, self.waveforms.generate_square, self._no_convert)
+        self._test_signal_with_phase("square", self.floatSink, self.waveforms.generate_square, self._convert_float_2_float32)
     
     def test_square_short(self):
         print "\n... Starting Test square with dataShort_out"
@@ -182,7 +182,7 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         
     def test_triangle_float(self):
         print "\n... Starting Test triangle with dataFloat_out"
-        self._test_signal_with_phase("triangle", self.floatSink, self.waveforms.generate_triangle, self._no_convert)
+        self._test_signal_with_phase("triangle", self.floatSink, self.waveforms.generate_triangle, self._convert_float_2_float32)
         
     def test_triangle_short(self):
         print "\n... Starting Test triangle with dataShort_out"
@@ -198,7 +198,7 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
 
     def test_no_configure_float(self):
         print "\n...Starting Test no configure with dataFloat_out"
-        self._test_no_configure(self.floatSink, self._no_convert)
+        self._test_no_configure(self.floatSink, self._convert_float_2_float32)
 
     def test_no_configure_short(self):
         print "\n...Starting Test no configure with dataShort_out"
@@ -258,6 +258,14 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
             shortData.append(np.int16(min(shortMax, max(shortMin, np.float32(data[i])))))
              
         return shortData.tolist()
+
+    def _convert_float_2_float32(self, data):
+        floatData = array("f")
+                
+        for i in range(len(data)):
+            floatData.append(np.float32(data[i]))
+             
+        return floatData.tolist()
 
     def _no_convert(self, data):
         return data

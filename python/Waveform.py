@@ -81,9 +81,9 @@ class Waveform:
             sum1 = v1*v1 + v2*v2
             if sum1 >= 1.0 or sum1 <1e-20: continue
             sum1 = fdev * float(math.sqrt(factor*math.log(sum1)/sum1))
-            outbuff[i] = v1*sum1
+            outbuff[i] = float(np.float32(v1*sum1))
             if (i+1) < maxIndex:
-                outbuff[i+1] = v2*sum1
+                outbuff[i+1] = float(np.float32(v2*sum1))
             i+=2
         
         self.seed = int(sis*self.T26)
@@ -103,23 +103,23 @@ class Waveform:
     #                           cos(x+dp) = cos(x)*cos(dp) - sin(x)*sin(dp)
     def sincos(self, amp, p, dp, n, spa):
         outbuff = range(n*spa)
-        cxr = np.float32(amp*math.cos(p*self.TWOPI))
-        cxi = np.float32(amp*math.sin(p*self.TWOPI))
-        dxr = np.float32(math.cos(dp*self.TWOPI))
-        dxi = np.float32(math.sin(dp*self.TWOPI))
+        cxr = amp*math.cos(p*self.TWOPI)
+        cxi = amp*math.sin(p*self.TWOPI)
+        dxr = math.cos(dp*self.TWOPI)
+        dxi = math.sin(dp*self.TWOPI)
         if spa==2:
             for i in range(0, n*2, 2):
-                outbuff[i] = float(cxr)
-                outbuff[i+1] = float(cxi)
-                axr = np.float32(np.float32(cxr*dxr) - np.float32(cxi*dxi))
-                axi = np.float32(np.float32(cxr*dxi) + np.float32(cxi*dxr))
+                outbuff[i] = float(np.float32(cxr))
+                outbuff[i+1] = float(np.float32(cxi))
+                axr = (cxr*dxr) - (cxi*dxi)
+                axi = (cxr*dxi) + (cxi*dxr)
                 cxr=axr 
                 cxi=axi
         elif spa==1:
             for i in range(n):
-                outbuff[i] = float(cxi)
-                axr = np.float32(np.float32(cxr*dxr) - np.float32(cxi*dxi))
-                axi = np.float32(np.float32(cxr*dxi) + np.float32(cxi*dxr))
+                outbuff[i] = float(np.float32(cxi))
+                axr = (cxr*dxr) - (cxi*dxi)
+                axi = (cxr*dxi) + (cxi*dxr)
                 cxr=axr
                 cxi=axi
         elif spa==-1:
@@ -154,9 +154,9 @@ class Waveform:
                 p -= 1.0
             elif p >= 0.5:
                 value = famp
-            outbuff[i] = value
+            outbuff[i] = float(np.float32(value))
             if spa == 2:
-                outbuff[i+1] = value
+                outbuff[i+1] = float(np.float32(value))
             p += dp
             
         return outbuff
@@ -183,9 +183,9 @@ class Waveform:
                 value = float(famp - fp*famp2)
             else:
                 value = float(famp + fp*famp2)
-            outbuff[i] = value
+            outbuff[i] = float(np.float32(value))
             if spa == 2:
-                outbuff[i+1] = value
+                outbuff[i+1] = float(np.float32(value))
             fp += dp
         
         return outbuff
@@ -209,9 +209,9 @@ class Waveform:
             if fp >= 0.5:
                 fp -= 1.0
             value = float(fp*famp2)
-            outbuff[i] = value
+            outbuff[i] = float(np.float32(value))
             if spa == 2:
-                outbuff[i+1] = value
+                outbuff[i+1] = float(np.float32(value))
             fp += dp
             
         return outbuff
@@ -235,9 +235,9 @@ class Waveform:
                 p -= 1.0
             else:
                 value = 0
-            outbuff[i] = value
+            outbuff[i] = float(np.float32(value))
             if spa == 2:
-                outbuff[i+1] = value
+                outbuff[i+1] = float(np.float32(value))
             p += dp
             
         return outbuff
@@ -252,7 +252,7 @@ class Waveform:
         outbuff = range(n*spa)
         
         for i in range(n*spa):
-            outbuff[i] = amp 
+            outbuff[i] = float(np.float32(amp))
         
         return outbuff
             
@@ -265,13 +265,13 @@ class Waveform:
     # @return the new data buffer and the LRS at end of array
     def lrs(self, amp, n, spa, lrs):
         outbuff = range(n*spa)
-        factor = np.float32(amp/2.0/self.B1G)
+        factor = (amp/2.0/self.B1G)
         
         for i in range(0, n*spa, spa):
-            data = np.float32(factor * np.float32(lrs))
-            outbuff[i] = float(data)
+            data = (factor * lrs)
+            outbuff[i] = float(np.float32(data))
             if spa == 2:
-                outbuff[i+1] = float(data)
+                outbuff[i+1] = float(np.float32(data))
                 
             bit0 = (~(lrs ^ (lrs>>1) ^  (lrs>>5) ^ (lrs>>25)))&0x1
             lrs <<= 1
@@ -294,9 +294,9 @@ class Waveform:
     def ramp(self, amp, n, spa, data):
         outbuff = range(n*spa)
         for i in range(0, n*spa, spa):
-            outbuff[i] = data
+            outbuff[i] = float(np.float32(data))
             if spa == 2:
-                outbuff[i+1] = data
+                outbuff[i+1] = float(np.float32(data))
             data = data + 1
             if data >= amp:
                 data = int(-amp)

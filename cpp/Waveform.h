@@ -55,24 +55,23 @@ namespace Waveform{
 		  @param spa  Scalars per atom, 2 for Complex
 	 */
 	void whitenoise(std::vector<float>& fbuf, double sdev, int n, int spa) {
-		float v1,v2,sum;
-		float fdev = (float)sdev;
-		float factor = (float)(-2.0 / log(10.0));
+		double v1,v2,sum;
 		double sis=((double)seed)/T26;
+		double factor = -2.0 / log(10.0);
 		for (int i=0; i<n*spa;) {
 			sis = sis*A + BI;
 			sis = sis - (double)(int)sis;
-			v1 = (float)sis; v1 = v1+v1-1;
+			v1 = sis+sis-1;
 			sis = sis*A + BI;
 			sis = sis - (double)(int)sis;
-			v2 = (float)sis; v2 = v2+v2-1;
+			v2 = sis+sis-1;
 			sum = v1*v1 + v2*v2;
 			if (sum>=1.0) continue;
-			sum = fdev * (float)sqrt(factor*log(sum)/sum);
-			//      sum = fdev * Native.sqrtf(factor*Native.logf(sum)/sum);
-			fbuf[i++] = v1*sum;
+			sum = sdev * sqrt(factor*log(sum)/sum);
+			//      sum = sdev * Native.sqrtf(factor*Native.logf(sum)/sum);
+			fbuf[i++] =(float) v1*sum;
 			if(i<n*spa){
-				fbuf[i++] = v2*sum;
+				fbuf[i++] =(float) v2*sum;
 			}
 		}
 		seed = (int)(sis*T26);
@@ -119,22 +118,22 @@ namespace Waveform{
 	 *                            cos(x+dp) = cos(x)*cos(dp) - sin(x)*sin(dp)
 	 */
 	void sincos (std::vector<float>& fbuf, double amp, double p, double dp, int n, int spa) {
-		float cxr=0,cxi=0, dxr=0,dxi=0, axr,axi;
+		double cxr=0,cxi=0, dxr=0,dxi=0, axr,axi;
 		if (spa>0) { // NTN 2009-12-16: only need to calculate below variables when spa>0
-			cxr = (float) amp*cos(p*TWOPI);
-			cxi = (float) amp*sin(p*TWOPI);
-			dxr = (float) cos(dp*TWOPI);
-			dxi = (float) sin(dp*TWOPI);
+			cxr = amp*cos(p*TWOPI);
+			cxi = amp*sin(p*TWOPI);
+			dxr = cos(dp*TWOPI);
+			dxi = sin(dp*TWOPI);
 		}
 		if (spa==2) for (int i=0; i<n*2;) {
-			fbuf[i++]= cxr;
-			fbuf[i++]= cxi;
+			fbuf[i++]=(float) cxr;
+			fbuf[i++]=(float) cxi;
 			axr = (cxr*dxr - cxi*dxi);
 			axi = (cxr*dxi + cxi*dxr);
 			cxr=axr; cxi=axi;
 		}
 		else if (spa==1) for (int i=0; i<n;) {
-			fbuf[i++]= cxi;
+			fbuf[i++]=(float) cxi;
 			axr = (cxr*dxr - cxi*dxi);
 			axi = (cxr*dxi + cxi*dxr);
 			cxr=axr; cxi=axi;
@@ -204,14 +203,13 @@ namespace Waveform{
 		  @param spa  Scalars per atom, 2 for Complex
 	 */
 	void square (std::vector<float>& fbuf, double amp, double p, double dp, int n, int spa) {
-		float value;
-		float famp = (float)amp;
-		float famp2 = -famp;
+		double value;
+		double amp2 = -amp;
 		for (int i=0; i<n*spa; ) {
-			value = famp2;
+			value = amp2;
 			if (p>=1.0) p -= 1.0;
-			else if (p>=0.5) value = famp;
-			fbuf[i++] = value; if (spa==2) fbuf[i++] = value;
+			else if (p>=0.5) value = amp;
+			fbuf[i++] =(float) value; if (spa==2) fbuf[i++] =(float) value;
 			p += dp;
 		}
 	}
@@ -245,15 +243,14 @@ namespace Waveform{
 		  @param spa  Scalars per atom, 2 for Complex
 	 */
 	void triangle (std::vector<float>& fbuf, double amp, double p, double dp, int n, int spa) {
-		float value;
-		float famp = (float)amp;
-		float famp2 = 4*famp;
+		double value;
+		double amp2 = 4*amp;
 		double fp = (p-0.5); // This needs to be in double precision for phase accuracy
 		for (int i=0; i<n*spa; ) {
 			if (fp>=0.5) fp -= 1.0;
-			if (fp>0) value = (float)(famp - fp*famp2);
-			else      value = (float)(famp + fp*famp2);
-			fbuf[i++] = value; if (spa==2) fbuf[i++] = value;
+			if (fp>0) value = amp - fp*amp2;
+			else      value = amp + fp*amp2;
+			fbuf[i++] =(float) value; if (spa==2) fbuf[i++] =(float) value;
 			fp += dp;
 		}
 	}
@@ -269,13 +266,13 @@ namespace Waveform{
 	void triangle (std::vector<double>& dbuf, double amp, double p, double dp, int n, int spa) {
 		double value;
 		double amp2 = 4*amp;
-		double fp = (p-0.5), fdp = dp;
+		double fp = (p-0.5);
 		for (int i=0; i<n*spa; ) {
 			if (fp>=0.5) fp -= 1.0;
 			if (fp>0) value = amp - fp*amp2;
 			else      value = amp + fp*amp2;
 			dbuf[i++] = value; if (spa==2) dbuf[i++] = value;
-			fp += fdp;
+			fp += dp;
 		}
 	}
 
@@ -288,14 +285,13 @@ namespace Waveform{
 		  @param spa  Scalars per atom, 2 for Complex
 	 */
 	void sawtooth (std::vector<float>& fbuf, double amp, double p, double dp, int n, int spa) {
-		float value;
-		float famp = (float)amp;
-		float famp2 = 2*famp;
+		double value;
+		double amp2 = 2*amp;
 		double fp = (p-0.5); // This needs to be in double precision for phase accuracy
 		for (int i=0; i<n*spa; ) {
 			if (fp>=0.5) fp -= 1.0;
-			value = (float)fp*famp2;
-			fbuf[i++] = value; if (spa==2) fbuf[i++] = value;
+			value = fp*amp2;
+			fbuf[i++] =(float) value; if (spa==2) fbuf[i++] =(float) value;
 			fp += dp;
 		}
 	}
@@ -329,11 +325,10 @@ namespace Waveform{
 		  @param spa  Scalars per atom, 2 for Complex
 	 */
 	void pulse (std::vector<float>& fbuf, double amp, double p, double dp, int n, int spa) {
-		float value;
-		float famp = (float)amp;
+		double value;
 		for (int i=0; i<n*spa; ) {
-			if (p>=1.0) { value = famp; p -= 1.0; } else value=0;
-			fbuf[i++] = value; if (spa==2) fbuf[i++] = value;
+			if (p>=1.0) { value = amp; p -= 1.0; } else value=0;
+			fbuf[i++] =(float) value; if (spa==2) fbuf[i++] =(float) value;
 			p += dp;
 		}
 	}
@@ -362,8 +357,7 @@ namespace Waveform{
 		  @param spa  Scalars per atom, 2 for Complex
 	 */
 	void constant (std::vector<float>& fbuf, double amp, int n, int spa) {
-		float famp = (float)amp;
-		for (int i=0; i<n*spa; ) fbuf[i++]=famp;
+		for (int i=0; i<n*spa; ) fbuf[i++]=(float) amp;
 	}
 
 	/** Create a CONSTANT DOUBLE array of given amplitude
@@ -385,15 +379,15 @@ namespace Waveform{
 		  @return the LRS at end of array
 	 */
 	int lrs (std::vector<float>& fbuf, double amp, int n, int spa, int lrs) {
-		float data;
-		float factor = (float)(amp/2/B1G);
+		double data;
+		double factor = (amp/2/B1G);
 		for (int i=0; i<n*spa; i++) {
 			data = factor * lrs;
 			int bit0 = (~(lrs ^ (lrs>>1) ^  (lrs>>5) ^ (lrs>>25)))&0x1;
 			lrs <<= 1;
 			lrs |= bit0;
-			if (spa==2) fbuf[i++] = data;
-			fbuf[i] = data;
+			if (spa==2) fbuf[i++] = (float) data;
+			fbuf[i] = (float) data;
 		}
 		return lrs;
 	}
@@ -430,8 +424,8 @@ namespace Waveform{
 	 */
 	int ramp (std::vector<float>& fbuf, double amp, int n, int spa, int data) {
 		for (int i=0; i<n*spa; i++) {
-			if (spa==2) fbuf[i++] = data;
-			fbuf[i] = data;
+			if (spa==2) fbuf[i++] =(float) data;
+			fbuf[i] =(float) data;
 			if (++data >= amp) data = (int)(-amp);
 		}
 		return data;
@@ -447,8 +441,8 @@ namespace Waveform{
 	 */
 	int ramp (std::vector<double>& dbuf, double amp, int n, int spa, int data) {
 		for (int i=0; i<n*spa; i++) {
-			if (spa==2) dbuf[i++] = data;
-			dbuf[i] = data;
+			if (spa==2) dbuf[i++] =(double) data;
+			dbuf[i] =(double) data;
 			if (++data >= amp) data = (int)(-amp);
 		}
 		return data;

@@ -29,23 +29,23 @@ class Waveforms(object):
 
     def generate_sine(self, amp, n, p=0, dp=0, spa=1):
         outbuff = range(n*spa)
-        cxr = np.float32(amp*math.cos(p*TWOPI))
-        cxi = np.float32(amp*math.sin(p*TWOPI))
-        dxr = np.float32(math.cos(dp*TWOPI))
-        dxi = np.float32(math.sin(dp*TWOPI))
-        for i in range(n):
+        cxr = amp*math.cos(p*TWOPI)
+        cxi = amp*math.sin(p*TWOPI)
+        dxr = math.cos(dp*TWOPI)
+        dxi = math.sin(dp*TWOPI)
+        for i in range(n*spa):
             outbuff[i] = cxi
-            axr = np.float32(np.float32(cxr*dxr) - np.float32(cxi*dxi))
-            axi = np.float32(np.float32(cxr*dxi) + np.float32(cxi*dxr))
+            axr = (cxr*dxr) - (cxi*dxi)
+            axi = (cxr*dxi) + (cxi*dxr)
             cxr=axr
             cxi=axi
         return outbuff
     
     def generate_lrs(self, magnitude, n, spa=1, lrs=1):
         outbuff = range(n*spa)
-        factor = np.float32(magnitude/2.0/self.B1G)
+        factor = (magnitude/2.0/self.B1G)
         for i in range(0, n*spa, spa):
-            data = np.float32(factor * np.float32(lrs))
+            data = (factor * (lrs))
             outbuff[i] = data
             if spa == 2:
                 outbuff[i+1] = data
