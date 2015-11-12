@@ -298,7 +298,7 @@ void SigGen_i::convertFloat2short(std::vector<float>& src, std::vector<short>& d
 	int minShort = std::numeric_limits<short>::min();
 	int maxShort = std::numeric_limits<short>::max();
 
-	for (int i = 0; i < (int)dst.size(); i++ ) {
+	for (size_t i = 0; i < dst.size(); i++ ) {
 		dst[i] = (short)std::min(maxShort, std::max(minShort, (int)src[i]));
 	}
 }
