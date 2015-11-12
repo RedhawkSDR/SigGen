@@ -27,6 +27,33 @@ import waveforms
 import numpy as np
 from array import array
 
+PRECISION=7
+NUM_PLACES=7
+
+def isclose(a, b, rel_tol=1e-09, abs_tol=0.0,debug=False):
+    ''' Return True if the values a and b are close to each other and False otherwise.
+
+	Whether or not two values are considered close is determined according to given absolute and relative tolerances.
+
+	rel_tol is the relative tolerance - it is the maximum allowed difference between a and b, relative to the larger
+        absolute value of a or b. For example, to set a tolerance of 5%, pass rel_tol=0.05. The default tolerance is 1e-09,
+        which assures that the two values are the same within about 9 decimal digits. rel_tol must be greater than zero.
+
+	abs_tol is the minimum absolute tolerance - useful for comparisons near zero. abs_tol must be at least zero.
+        
+        Note: take from math module in newer versions of Python (>= 3.5)
+    '''
+    retval = abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+    if debug:
+        _abs=abs(a-b)
+        _tol=max(rel_tol * max(abs(a), abs(b)), abs_tol)
+        _rel=rel_tol * max(abs(a), abs(b))
+        print '.' if retval else 'F', repr(a), repr(b), repr(_abs), repr(_tol), repr(_rel), repr(abs_tol)
+
+    return retval
+    #return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+        
+
 class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
     """Test for all component implementations in SigGen"""
 
@@ -270,6 +297,17 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
     def _no_convert(self, data):
         return data
 
+    def assert_isclose(self,a,b,precision=7,places=7):
+        ''' Similar to assertAlmostEqual, but based on digits of precision rather than decimal places
+            For 32-bit systems (float), the greatest precision possible is 7 digits.
+            For 64-bit systems (double), the greatest precision possible is 15 digits.
+            Set places for numbers near 0, where relative precision may fail.
+        '''
+        rel_tol=10**(-1*precision)
+        abs_tol=10**(-1*places)
+        # Rather than reimplement assert, call assertAlmostEqual which will fail
+        isclose(a,b,rel_tol,abs_tol) or self.assertAlmostEqual(a,b,places)
+
     def _test_constant(self, sink, type_cast):
         self._generate_config()
         self.config_params["shape"] = "constant"
@@ -287,7 +325,8 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         for p in rx_data:
             # Data returned is list of test_utils.BufferedPacket
             for value in p.data:
-                self.assertAlmostEqual(value, expected_value)
+                #self.assertAlmostEqual(value, expected_value)
+                self.assert_isclose(value, expected_value, PRECISION, NUM_PLACES)
 
     def _test_throttle(self, sink):
         self._generate_config()
@@ -380,7 +419,8 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
             # Data returned is list of test_utils.BufferedPacket
             self.assertEqual(len(p.data), n_expected)
             for rx_val, exp_val in zip(p.data, expected_values):
-                self.assertAlmostEqual(rx_val, exp_val, 5)
+                #self.assertAlmostEqual(rx_val, exp_val, 5)
+                self.assert_isclose(rx_val, exp_val, PRECISION, NUM_PLACES)
     
     def _test_signal_with_phase(self, shape, sink, signal_function, convert_function):
         self._generate_config()
@@ -401,8 +441,9 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
             # Data returned is list of test_utils.BufferedPacket
             self.assertEqual(len(p.data), n_expected)
             for rx_val, exp_val in zip(p.data, expected_values):
-                self.assertAlmostEqual(rx_val, exp_val, 5)
-        
+                #self.assertAlmostEqual(rx_val, exp_val, 5)
+                self.assert_isclose(rx_val, exp_val, PRECISION, NUM_PLACES)
+
     def _test_push_sri(self, sink):
         self._generate_config()
         self.config_params.pop("stream_id")
@@ -416,7 +457,8 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         print rx_data[-1].T
         
         for p in rx_data:
-            self.assertAlmostEqual(self.config_params["sample_rate"], 1 / p.sri.xdelta)
+            #self.assertAlmostEqual(self.config_params["sample_rate"], 1 / p.sri.xdelta)
+            self.assert_isclose(self.config_params["sample_rate"], 1 / p.sri.xdelta, PRECISION, NUM_PLACES)
 
     def _test_no_configure(self, sink, convert_function):
         time.sleep(1.)
@@ -434,7 +476,8 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
             # Data returned is list of test_utils.BufferedPacket
             self.assertEqual(len(p.data), n_expected)
             for rx_val, exp_val in zip(p.data, expected_values):
-                self.assertAlmostEqual(rx_val, exp_val, 5)
+                #self.assertAlmostEqual(rx_val, exp_val, 5)
+                self.assert_isclose(rx_val, exp_val, PRECISION, NUM_PLACES)
                 
     def _test_frequency(self, sink):
         self._generate_config()
