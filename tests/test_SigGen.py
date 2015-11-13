@@ -494,13 +494,11 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         expected_zero_crossings = 2 * self.config_params["frequency"] * self.config_params["xfer_len"] / self.config_params["sample_rate"] # 2 * (zc/s /2) * (S/packet) / (S/s) = zc
         
         data = rx_data[0].data
-        for i, x in enumerate(data):
-            if i == (len(data)-1):
-                break
-            
-            if (x <= 0 and data[i+1] > 0) or (x >= 0 and data[i+1] < 0):
+        if abs(data[0]) <= 10**(-1*NUM_PLACES): data[0]=0.0 #same as (but less math): if isclose(data[0], 0, PRECISION, NUM_PLACES): data[0]=0.0
+        for i in xrange(len(data)-1):
+            if abs(data[i+1]) <= 10**(-1*NUM_PLACES): data[i+1]=0.0
+            if (data[i] <= 0 and data[i+1] > 0) or (data[i] >= 0 and data[i+1] < 0):
                 zero_crossings += 1
-                
         self.assertEqual(zero_crossings, expected_zero_crossings)
     
 if __name__ == "__main__":
