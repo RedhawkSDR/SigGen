@@ -20,7 +20,7 @@ import unittest
 import ossie.utils.testing
 import os
 from omniORB import any
-import test_utils
+import helper_utils as test_utils
 from ossie.properties import props_from_dict
 import time
 import waveforms
