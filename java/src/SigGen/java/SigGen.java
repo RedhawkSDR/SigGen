@@ -139,7 +139,9 @@ public class SigGen extends SigGen_base {
 
     @Override
     public void start() throws StartError {
-        this.nextTime = bulkio.time.utils.now();
+    	if (!this.started()) {
+    		this.nextTime = bulkio.time.utils.now();
+    	}
         super.start();
     }
 

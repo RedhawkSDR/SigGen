@@ -73,10 +73,9 @@ SigGen_i::~SigGen_i()
 }
 
 void SigGen_i::start() throw (CF::Resource::StartError, CORBA::SystemException) {
-	struct timeval tmp_time;
-	struct timezone tmp_tz;
-	gettimeofday(&tmp_time, &tmp_tz);
-	nextTime = bulkio::time::utils::create(tmp_time.tv_sec, tmp_time.tv_usec / 1e6);
+	if (!started()){
+		nextTime = bulkio::time::utils::now();
+	}
 	SigGen_base::start();
 }
 

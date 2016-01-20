@@ -61,6 +61,7 @@ class SigGen_i(SigGen_base):
         self.delta_phase_offset = 0.0
         self.cached_stream_id=self.stream_id
         self.stream_created=False
+        self.next_time = None
         
         self._waveform = Waveform.Waveform()
 
@@ -71,7 +72,8 @@ class SigGen_i(SigGen_base):
         self.addPropertyChangeListener("sri_blocking", self.prop_update_sri_blocking)
 
     def start(self):
-        self.next_time = bulkio.timestamp.now()
+        if not self._get_started():
+            self.next_time = bulkio.timestamp.now()
         SigGen_base.start(self)
 
     def process(self):
