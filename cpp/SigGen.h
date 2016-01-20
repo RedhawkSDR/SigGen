@@ -34,6 +34,8 @@ class SigGen_i : public SigGen_base
 
     private:
         boost::mutex sigGenLock_;
+        std::string cached_stream_id;
+        bool stream_created; // Used to know when to send EOS on stream_id change
 
         void stream_idChanged(const std::string *oldValue, const std::string *newValue);
         void keywordUpdate(const double *oldValue, const double *newValue);

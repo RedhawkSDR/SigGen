@@ -174,6 +174,14 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
     def test_stream_id_short(self):
         print "\n... Starting Test Stream ID for dataShort_out"
         self._test_stream_id(self.shortSink)
+    
+    def test_stream_id_eos_float(self):
+        print "\n... Starting Test Stream ID EOS for dataFloat_out"
+        self._test_stream_id_eos(self.floatSink)
+    
+    def test_stream_id_eos_short(self):
+        print "\n... Starting Test Stream ID EOS for dataShort_out"
+        self._test_stream_id_eos(self.shortSink)
         
     def test_lrs_float(self):
         print "\n... Starting Test lrs with dataFloat_out"
@@ -275,6 +283,20 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
             if count == 2000:
                 break
         return received_data1
+    
+    def _get_until_eos(self, timeout, sink):
+        count = 0
+        rx_data=[]
+        while (count < 100.0*timeout):
+            out = sink.getData()
+            for i,p in enumerate(out):
+                if p.EOS:
+                    return rx_data+out[:i+1]
+            else:
+                rx_data.extend(out)
+            time.sleep(.01)
+            count += 1
+        return rx_data
 
     def _convert_float_2_short(self, data):
         shortData = array("h")
@@ -400,6 +422,27 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         for p in rx_data:
             # Data returned is list of test_utils.BufferedPacket
             self.assertEqual(p.sri.streamID, test_stream_id)
+    
+    def _test_stream_id_eos(self, sink):
+        self._generate_config()
+        self.config_params["shape"] = "constant"
+        
+        test_stream_id = "unit_test_stream_id_eos"
+        self.config_params.pop("stream_id") # Verify that default stream id value is used initially
+        self.comp_obj.configure(props_from_dict(self.config_params))
+        time.sleep(1.) # Ensure SigGen is sending out the desired signal before continuing
+        
+        self.comp_obj.configure(props_from_dict({"stream_id":test_stream_id}))
+        print "\nConfigured with new stream id:",test_stream_id
+        
+        rx_data = self._get_until_eos(10, sink)
+        self.assertTrue(len(rx_data)>0, "No packets received.")
+        
+        print "\nReceived Data Time Range:"
+        print rx_data[0].T
+        print rx_data[-1].T
+        
+        self.assertTrue(rx_data[-1].EOS, "No EOS before timeout.")
         
     def _test_lrs(self, sink, convert_function):
         self._generate_config()

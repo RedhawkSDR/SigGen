@@ -57,6 +57,8 @@ SigGen_i::SigGen_i(const char *uuid, const char *label) :
 	sri.streamID = stream_id.c_str();
 	keywordUpdate(NULL, NULL);
 	sriUpdate = true;
+	cached_stream_id = stream_id;
+	stream_created = false;
 
 	addPropertyChangeListener("stream_id", this, &SigGen_i::stream_idChanged);
 	addPropertyChangeListener("chan_rf", this, &SigGen_i::keywordUpdate);
@@ -212,6 +214,7 @@ void SigGen_i::start() throw (CF::Resource::StartError, CORBA::SystemException) 
 int SigGen_i::serviceFunction()
 {
 	boost::mutex::scoped_lock lock(sigGenLock_);
+
 	if (stream_id.empty()){
 		stream_id = "";
 		sri.streamID = stream_id.c_str();
@@ -231,12 +234,18 @@ int SigGen_i::serviceFunction()
 	}
 	if (sriUpdate) {
 		sriUpdate = false;
+		if (stream_id != cached_stream_id && stream_created) {
+			dataFloat_out->pushPacket(std::vector<float>(), nextTime, true, cached_stream_id);
+			dataShort_out->pushPacket(std::vector<short>(), nextTime, true, cached_stream_id);
+		}
+		cached_stream_id = stream_id;
+		stream_created = true;
 		dataFloat_out->pushSRI(sri);
 		dataShort_out->pushSRI(sri);
 	} else {
-		if (!dataFloat_out->getCurrentSRI().count(stream_id))
+		if (!dataFloat_out->getCurrentSRI().count(cached_stream_id))
 			dataFloat_out->pushSRI(sri);
-		if (!dataShort_out->getCurrentSRI().count(stream_id))
+		if (!dataShort_out->getCurrentSRI().count(cached_stream_id))
 			dataShort_out->pushSRI(sri);
 	}
 
@@ -269,9 +278,9 @@ int SigGen_i::serviceFunction()
 	phase -= floor(phase); // modulo 1.0
 
 	// Push the data
-	dataFloat_out->pushPacket(floatData, nextTime, false, stream_id);
+	dataFloat_out->pushPacket(floatData, nextTime, false, cached_stream_id);
 	convertFloat2short(floatData, shortData);
-	dataShort_out->pushPacket(shortData, nextTime, false, stream_id);
+	dataShort_out->pushPacket(shortData, nextTime, false, cached_stream_id);
 
 	// Advance time
 	nextTime.tfsec += last_xfer_len * sri.xdelta;
