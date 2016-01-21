@@ -59,6 +59,8 @@ class SigGen_i(SigGen_base):
         self.sample_time_delta = 0.0
         self.delta_phase = 0.0
         self.delta_phase_offset = 0.0
+        self.cached_stream_id=self.stream_id
+        self.stream_created=False
         
         self._waveform = Waveform.Waveform()
 
@@ -94,14 +96,22 @@ class SigGen_i(SigGen_base):
             self.sri.xdelta = self.sample_time_delta
             self.sriUpdate = True
             
-        if self.sriUpdate or not self.port_dataFloat_out.sriDict.has_key(self.stream_id) or not self.port_dataShort_out.sriDict.has_key(self.stream_id):
+        if self.sriUpdate or not self.port_dataFloat_out.sriDict.has_key(self.cached_stream_id) or not self.port_dataShort_out.sriDict.has_key(self.cached_stream_id):
             self.sriUpdate = False
+            
+            # Send EOS if necessary
+            if self.stream_id != self.cached_stream_id and self.stream_created:
+                self.port_dataFloat_out.pushPacket([], self.next_time, True, self.cached_stream_id)
+                self.port_dataShort_out.pushPacket([], self.next_time, True, self.cached_stream_id)
+            self.cached_stream_id = self.stream_id
+        
             keywords = []
             if self.chan_rf != -1:
                 keywords.append(CF.DataType('CHAN_RF', any.to_any(self.chan_rf)))
             if self.col_rf != -1:
                 keywords.append(CF.DataType('COL_RF', any.to_any(self.col_rf)))
             self.sri.keywords = keywords
+            self.stream_created = True
             self.port_dataFloat_out.pushSRI(self.sri)
             self.port_dataShort_out.pushSRI(self.sri)
             
@@ -135,12 +145,12 @@ class SigGen_i(SigGen_base):
         self.phase -= math.floor(self.phase) # module 1.0
         
         # Push the data
-        self.port_dataFloat_out.pushPacket(data, self.next_time, False, self.stream_id)
+        self.port_dataFloat_out.pushPacket(data, self.next_time, False, self.cached_stream_id)
         
         # Only convert and push short data if the port is connected
         if self.port_dataShort_out._get_state() == BULKIO.ACTIVE:
             self.port_dataShort_out.pushPacket(self.convert_float_2_short(data), 
-                                           self.next_time, False, self.stream_id)
+                                           self.next_time, False, self.cached_stream_id)
         
         # Advance time
         self.next_time.tfsec += self.last_xfer_len * self.sri.xdelta
