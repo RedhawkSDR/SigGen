@@ -20,8 +20,6 @@ package SigGen.java;
 import java.util.Arrays;
 import java.util.Properties;
 
-import org.omg.CORBA.Any;
-import org.omg.CORBA.AnyHolder;
 import org.omg.CORBA.TCKind;
 import org.ossie.properties.AnyUtils;
 import org.ossie.properties.PropertyListener;
@@ -50,6 +48,9 @@ public class SigGen extends SigGen_base {
 	private StreamSRI sri = new StreamSRI();
 	private volatile boolean sriUpdate;
 	private PrecisionUTCTime nextTime;
+	
+	private String cached_stream_id;
+	private Boolean stream_created;
     
 	/**
      * This is the component constructor. In this method, you may add additional
@@ -98,6 +99,10 @@ public class SigGen extends SigGen_base {
 		sri.blocking = (this.sri_blocking.getValue() != null) ?
 				this.sri_blocking.getValue() : false;
 		sriUpdate = true;
+
+		cached_stream_id = this.stream_id.getValue();
+		stream_created = false;
+		
 		this.stream_id.addChangeListener(new PropertyListener<String>() {
 			public void valueChanged(String oldValue, String newValue) {
 				sriUpdate = true;
@@ -256,11 +261,17 @@ public class SigGen extends SigGen_base {
 				sriUpdate = true;
 			}
 
-			if (sriUpdate || (!hasSri(stream_id.getValue()))) {
-				
+			if (sriUpdate || (!hasSri(cached_stream_id))) {
 				// Reset the flag first (in case other updates to props occur while we're in here)
 				sriUpdate = false;
-				sri.streamID = stream_id.getValue();
+				
+				// Send EOS if necessary
+				if (!stream_id.getValue().equals(cached_stream_id) && stream_created) {
+					this.port_dataFloat_out.pushPacket(new float[]{}, this.nextTime, true, cached_stream_id);
+					this.port_dataShort_out.pushPacket(new short[]{}, this.nextTime, true, cached_stream_id);
+				}
+				cached_stream_id = this.stream_id.getValue();
+				sri.streamID = cached_stream_id;
 				sri.xdelta = 1.0 / this.sample_rate.getValue();
 
 				double chan_rf = this.chan_rf.getValue();
@@ -282,7 +293,8 @@ public class SigGen extends SigGen_base {
 					sri.keywords[index] = new DataType("COL_RF", AnyUtils.toAny(col_rf, TCKind.tk_double));
 					index++;
 				}
-				
+
+				stream_created = true;
 				this.port_dataFloat_out.pushSRI(sri);
 				this.port_dataShort_out.pushSRI(sri);
 			}
