@@ -34,19 +34,13 @@ PREPARE_LOGGING(SigGen_i)
 SigGen_i::SigGen_i(const char *uuid, const char *label) :
     SigGen_base(uuid, label)
 {
-	last_xfer_len = xfer_len;
-	floatData.resize(last_xfer_len);
-	shortData.resize(last_xfer_len);
 	phase = 0;
-	chirp = 0;
-	sample_time_delta = 0.0;
 	delta_phase = 0.0;
-	delta_phase_offset = 0.0;
 
 	sri = BULKIO::StreamSRI();
 	sri.hversion = 1;
 	sri.xstart = 0.0;
-	sri.xdelta = 0.0;
+	sri.xdelta = 1.0/sample_rate;;
 	sri.xunits = BULKIO::UNITS_TIME;
 	sri.subsize = 0;
 	sri.ystart = 0.0;
@@ -57,13 +51,14 @@ SigGen_i::SigGen_i(const char *uuid, const char *label) :
 	sri.streamID = stream_id.c_str();
 	keywordUpdate(NULL, NULL);
 	sriUpdate = true;
-	cached_stream_id = stream_id;
 	stream_created = false;
+	eos_stream_id.clear();
 
 	addPropertyChangeListener("stream_id", this, &SigGen_i::stream_idChanged);
 	addPropertyChangeListener("chan_rf", this, &SigGen_i::keywordUpdate);
 	addPropertyChangeListener("col_rf", this, &SigGen_i::keywordUpdate);
 	addPropertyChangeListener("sri_blocking", this, &SigGen_i::sri_blockingChanged);
+	addPropertyChangeListener("sample_rate", this, &SigGen_i::samplerateChanged);
 
 }
 
@@ -212,77 +207,90 @@ void SigGen_i::start() throw (CF::Resource::StartError, CORBA::SystemException) 
 ************************************************************************************************/
 int SigGen_i::serviceFunction()
 {
-	boost::mutex::scoped_lock lock(sigGenLock_);
+	{
+		// Cache/update from props and class vars that we do not want changing during execution
+		boost::mutex::scoped_lock lock(sigGenLock_);
 
-	if (stream_id.empty()){
-		stream_id = "";
-		sri.streamID = stream_id.c_str();
-	}
+		if (sriUpdate) {
+			sriUpdate = false;
+			cache.sriUpdate = true;
 
-	if ((xfer_len != last_xfer_len) || ((size_t) xfer_len != floatData.size()) || ((size_t) xfer_len != shortData.size())) {
-		last_xfer_len = xfer_len;
-		floatData.resize(last_xfer_len);
-		shortData.resize(last_xfer_len);
-		sriUpdate = true;
-	}
+			if (stream_id.empty()){
+				stream_id = uuidGenerator();
+				sri.streamID = stream_id.c_str();
+			}
 
-	sample_time_delta = 1.0/sample_rate;
-	if ((sample_time_delta > (sri.xdelta*1.0000001))||(sample_time_delta < (sri.xdelta*0.999999))){
-		sri.xdelta = sample_time_delta;
-		sriUpdate = true;
-	}
-	if (sriUpdate) {
-		sriUpdate = false;
-		if (stream_id != cached_stream_id && stream_created) {
-			dataFloat_out->pushPacket(std::vector<float>(), nextTime, true, cached_stream_id);
-			dataShort_out->pushPacket(std::vector<short>(), nextTime, true, cached_stream_id);
+			if (cache.stream_id != stream_id && stream_created){
+				// We need to send an EOS for cache.stream_id,
+				// but wait until we release the mutex
+				eos_stream_id = cache.stream_id;
+			}
+
+			cache.sri = sri;
+			cache.stream_id = stream_id;
 		}
-		cached_stream_id = stream_id;
-		stream_created = true;
-		dataFloat_out->pushSRI(sri);
-		dataShort_out->pushSRI(sri);
-	} else {
-		if (!dataFloat_out->getCurrentSRI().count(cached_stream_id))
-			dataFloat_out->pushSRI(sri);
-		if (!dataShort_out->getCurrentSRI().count(cached_stream_id))
-			dataShort_out->pushSRI(sri);
+
+		cache.xfer_len = xfer_len;
+		cache.shape = shape;
+		delta_phase = frequency * cache.sri.xdelta;
 	}
 
-	delta_phase = frequency * sample_time_delta;
-	delta_phase_offset = chirp * sample_time_delta * sample_time_delta;
-	if ((delta_phase < 0) && (!shape.compare("sine"))) {
+	if (!eos_stream_id.empty()) {
+		dataFloat_out->pushPacket(std::vector<float>(), nextTime, true, eos_stream_id);
+		dataShort_out->pushPacket(std::vector<short>(), nextTime, true, eos_stream_id);
+		eos_stream_id.clear();
+	}
+
+	if (((size_t) cache.xfer_len != floatData.size()) || ((size_t) cache.xfer_len != shortData.size())) {
+		floatData.resize(cache.xfer_len);
+		shortData.resize(cache.xfer_len);
+	}
+
+	if (cache.sriUpdate) {
+		cache.sriUpdate = false;
+		stream_created = true;
+		dataFloat_out->pushSRI(cache.sri);
+		dataShort_out->pushSRI(cache.sri);
+	} else {
+		if (!dataFloat_out->getCurrentSRI().count(cache.stream_id))
+			dataFloat_out->pushSRI(cache.sri);
+		if (!dataShort_out->getCurrentSRI().count(cache.stream_id))
+			dataShort_out->pushSRI(cache.sri);
+	}
+
+	if ((delta_phase < 0) && (cache.shape != "sine")) {
 		delta_phase = -delta_phase;
 	}
 
 	// Generate the Waveform
-	if (shape == "sine"){
-		Waveform::sincos(floatData, magnitude, phase, delta_phase, last_xfer_len, 1);
-	} else if (shape == "square"){
-		Waveform::square(floatData, magnitude, phase, delta_phase, last_xfer_len, 1);
-	} else if (shape == "triangle") {
-		Waveform::triangle(floatData, magnitude, phase, delta_phase, last_xfer_len, 1);
-	} else if (shape == "sawtooth") {
-		Waveform::sawtooth(floatData, magnitude, phase, delta_phase, last_xfer_len, 1);
-	} else if (shape == "pulse") {
-		Waveform::pulse(floatData, magnitude, phase, delta_phase, last_xfer_len, 1);
-	} else if (shape == "constant") {
-		Waveform::constant(floatData, magnitude, last_xfer_len, 1);
-	} else if (shape == "whitenoise") {
-		Waveform::whitenoise(floatData, magnitude, last_xfer_len, 1);
-	} else if (shape == "lrs") {
-		Waveform::lrs(floatData, magnitude, last_xfer_len, 1, 1);
+	if (cache.shape == "sine"){
+		Waveform::sincos(floatData, magnitude, phase, delta_phase, cache.xfer_len, 1);
+	} else if (cache.shape == "square"){
+		Waveform::square(floatData, magnitude, phase, delta_phase, cache.xfer_len, 1);
+	} else if (cache.shape == "triangle") {
+		Waveform::triangle(floatData, magnitude, phase, delta_phase, cache.xfer_len, 1);
+	} else if (cache.shape == "sawtooth") {
+		Waveform::sawtooth(floatData, magnitude, phase, delta_phase, cache.xfer_len, 1);
+	} else if (cache.shape == "pulse") {
+		Waveform::pulse(floatData, magnitude, phase, delta_phase, cache.xfer_len, 1);
+	} else if (cache.shape == "constant") {
+		Waveform::constant(floatData, magnitude, cache.xfer_len, 1);
+	} else if (cache.shape == "whitenoise") {
+		Waveform::whitenoise(floatData, magnitude, cache.xfer_len, 1);
+	} else if (cache.shape == "lrs") {
+		Waveform::lrs(floatData, magnitude, cache.xfer_len, 1, 1);
 	}
 
-	phase += delta_phase * last_xfer_len; // increment phase
+	phase += delta_phase * cache.xfer_len; // increment phase
 	phase -= floor(phase); // modulo 1.0
 
 	// Push the data
-	dataFloat_out->pushPacket(floatData, nextTime, false, cached_stream_id);
+	dataFloat_out->pushPacket(floatData, nextTime, false, cache.stream_id);
 	convertFloat2short(floatData, shortData);
-	dataShort_out->pushPacket(shortData, nextTime, false, cached_stream_id);
+	dataShort_out->pushPacket(shortData, nextTime, false, cache.stream_id);
 
 	// Advance time
-	nextTime.tfsec += last_xfer_len * sri.xdelta;
+	nextTime.tfsec += cache.xfer_len * cache.sri.xdelta;
 	if (nextTime.tfsec > 1.0) {
 		nextTime.tfsec -= 1.0;
 		nextTime.twsec += 1.0;
@@ -290,7 +298,7 @@ int SigGen_i::serviceFunction()
 
 	// If we are throttling, wait...otherwise run at full speed
 	if (throttle == true) {
-		long wait_amt_usec = (long)(last_xfer_len * sample_time_delta * 1000000.0);
+		long wait_amt_usec = (long)(cache.xfer_len * cache.sri.xdelta * 1000000.0);
 		try {
 			usleep(wait_amt_usec);
 		} catch (...) {
@@ -353,5 +361,13 @@ void SigGen_i::sri_blockingChanged(const bool *oldValue, const bool *newValue)
 {
 	boost::mutex::scoped_lock lock(sigGenLock_);
 	sri.blocking = sri_blocking;
+	sriUpdate = true;
+}
+
+// Update sri.xdelta
+void SigGen_i::samplerateChanged(const double *oldValue, const double *newValue)
+{
+	boost::mutex::scoped_lock lock(sigGenLock_);
+	sri.xdelta = 1.0/sample_rate;
 	sriUpdate = true;
 }

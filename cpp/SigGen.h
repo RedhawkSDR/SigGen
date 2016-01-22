@@ -20,8 +20,36 @@
 #define SIGGEN_IMPL_H
 
 #include "SigGen_base.h"
+#include <uuid/uuid.h>
 
 class SigGen_i;
+
+/* Struct used to cache props and class members that are used in the ServiceFunction
+ * And updated outside of the ServiceFunction
+ * Note: not all props/member vars are cached. Those that are used (read) once and are
+ * not inter-dependent on other vars are not cached.
+ */
+struct SigGenCache {
+	SigGenCache(){
+		xfer_len=0;
+		shape="sine";
+		sriUpdate=true;
+	};
+
+	long xfer_len;
+	std::string shape;
+	std::string stream_id;
+	BULKIO::StreamSRI sri;
+	bool sriUpdate;
+};
+
+inline std::string uuidGenerator() {
+    uuid_t new_random_uuid;
+    uuid_generate_random(new_random_uuid);
+    char new_random_uuid_str[37];
+    uuid_unparse(new_random_uuid, new_random_uuid_str);
+    return std::string(new_random_uuid_str);
+};
 
 class SigGen_i : public SigGen_base
 {
@@ -34,25 +62,24 @@ class SigGen_i : public SigGen_base
 
     private:
         boost::mutex sigGenLock_;
-        std::string cached_stream_id;
-        bool stream_created; // Used to know when to send EOS on stream_id change
+        bool stream_created;
+        std::string eos_stream_id;
 
         void stream_idChanged(const std::string *oldValue, const std::string *newValue);
         void keywordUpdate(const double *oldValue, const double *newValue);
         void sri_blockingChanged(const bool *oldValue, const bool *newValue);
+        void samplerateChanged(const double *oldValue, const double *newValue);
         void convertFloat2short(std::vector<float>& src, std::vector<short>& dst);
 
         std::vector<float> floatData;
         std::vector<short> shortData;
     	double phase;
-    	double chirp;
-    	double sample_time_delta;
     	double delta_phase;
-    	double delta_phase_offset;
-    	long last_xfer_len;
     	BULKIO::StreamSRI sri;
     	bool sriUpdate;
         BULKIO::PrecisionUTCTime nextTime;
+
+        SigGenCache cache;
 
 };
 
