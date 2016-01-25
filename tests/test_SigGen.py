@@ -142,6 +142,26 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
     ##################
     # TEST FUNCTIONS #
     ##################
+    
+    def test_configure_latency(self):
+        print "\n... Starting Test Configure latency"
+        self._generate_config()
+        self.config_params["shape"] = "constant"
+        self.comp_obj.configure(props_from_dict(self.config_params))
+        time.sleep(1.) # Ensure SigGen is sending out the desired signal before continuing
+        
+        test_stream_id = 'unit_test_stream_%s'
+        MAX_LATENCY = 0.1
+        ITERATIONS = 10
+        total_time = 0.0
+        for i in xrange(ITERATIONS):
+            start_time = time.time()
+            self.comp_obj.configure(props_from_dict({"stream_id":test_stream_id%i}))
+            stop_time = time.time()
+            total_time += stop_time-start_time
+            time.sleep(0.1)
+        
+        self.assertTrue(total_time < ITERATIONS*MAX_LATENCY, "Average latency (%s) of configure call exceeds max allowed (%s)"%(total_time/ITERATIONS,MAX_LATENCY))
 
     def test_constant_float(self):
         print "\n... Starting Test Constant with dataFloat_out"
