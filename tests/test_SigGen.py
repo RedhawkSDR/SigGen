@@ -22,7 +22,7 @@ import os
 from omniORB import any
 import helper_utils as test_utils
 from ossie.properties import props_from_dict
-import time
+import time, math
 import waveforms
 import numpy as np
 from array import array
@@ -182,6 +182,14 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
     def test_stream_id_eos_short(self):
         print "\n... Starting Test Stream ID EOS for dataShort_out"
         self._test_stream_id_eos(self.shortSink)
+    
+    def test_double_start_float(self):
+        print "\n... Starting Test Double Start for dataFloat_out"
+        self._test_double_start(self.floatSink)
+    
+    def test_double_start_short(self):
+        print "\n... Starting Test Double Start for dataShort_out"
+        self._test_double_start(self.shortSink)
         
     def test_lrs_float(self):
         print "\n... Starting Test lrs with dataFloat_out"
@@ -443,7 +451,41 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
         print rx_data[-1].T
         
         self.assertTrue(rx_data[-1].EOS, "No EOS before timeout.")
+    
+    def _test_double_start(self, sink):
+        self._generate_config()
+        self.config_params["shape"] = "constant"
         
+        self.comp_obj.configure(props_from_dict(self.config_params))
+        time.sleep(1.) # Ensure SigGen is sending out the desired signal before continuing
+        
+        start_time = time.time()
+        time.sleep(1.) # get one second before calling start a second time
+        
+        self.comp_obj.start() # call start a second time
+        stop_time = time.time() + 1.0 # get at least one second after calling start a second time
+        
+        rx_len_sec = stop_time-start_time
+        rx_data = self._get_received_data(start_time, rx_len_sec, sink)
+        self.assertTrue(len(rx_data)>0, "No packets received.")
+        print "\nReceived Data Time Range:"
+        print rx_data[0].T
+        print rx_data[-1].T
+        
+        next_twsec = rx_data[0].T.twsec
+        next_tfsec = rx_data[0].T.tfsec
+        xdelta = 1./self.comp.sample_rate
+        for p in rx_data:
+            # Data returned is list of test_utils.BufferedPacket
+            self.assert_isclose(p.T.twsec, next_twsec, PRECISION, NUM_PLACES)
+            self.assert_isclose(p.T.tfsec, next_tfsec, PRECISION, NUM_PLACES)
+            time_delta = xdelta * len(p.data)
+            next_twsec += math.floor(time_delta)
+            next_tfsec += time_delta - math.floor(time_delta)
+            if next_tfsec >= 1.0:
+                next_tfsec -= 1.0
+                next_twsec += 1.0
+            
     def _test_lrs(self, sink, convert_function):
         self._generate_config()
         self.config_params["shape"] = "lrs"
