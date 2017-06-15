@@ -16,7 +16,7 @@
 # program.  If not, see http://www.gnu.org/licenses/.
 #
 
-AC_INIT(rh.SigGen, 2.0.1)
+AC_INIT(rh.SigGen, 2.0.2)
 AM_INIT_AUTOMAKE([nostdinc foreign])
 AC_CONFIG_MACRO_DIR([m4])
 
