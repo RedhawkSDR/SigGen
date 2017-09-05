@@ -1,7 +1,6 @@
 variables:
-  #Next versions of REDHAWK core-framework to be released
-  rh_20_release: '2.0.7'
-  rh_21_release: '2.1.2'
+  rh_20_release: '2.0.6'
+  rh_21_release: '2.1.1'
   namespace: rh.
   test_suite: test_$CI_PROJECT_NAME.py
 
@@ -17,17 +16,16 @@ before_script:
         rpm_release="`rpm --query --queryformat "%{release}\n" --specfile ${namespace}$CI_PROJECT_NAME.spec | awk -F"." "{print $1}"`.rh${safe_version}";
       fi
     - redhawk_repo=$yum_repo_url/redhawk-core-framework/$redhawk_version/$dist/$arch
-    - dsp_repo=$yum_repo_url/redhawk-sharedlibs/dsp/$dsp_version/rh${safe_version}/$dist/$arch
 
 .package: &package
-  image: ${docker_registry}utils/docker:latest-rpm
+  image: ${docker_registry}${docker_rpm_repository}docker:latest-rpm
   stage: build
   tags:
     - dind
   script:
     # Ensure newest version of FROM image
-    - docker pull ${docker_registry}rpmbuild:${dist}-${arch}-onbuild
-    - printf "FROM ${docker_registry}rpmbuild:$dist-$arch-onbuild" > Dockerfile
+    - docker pull ${docker_registry}${rpmbuild_repository}rpmbuild:${dist}-${arch}-onbuild
+    - printf "FROM ${docker_registry}${rpmbuild_repository}rpmbuild:$dist-$arch-onbuild" > Dockerfile
     - name=$(echo $CI_PROJECT_NAME| tr '[:upper:]' '[:lower:]')
     - docker build -t $name:$safe_ref-$dist-$arch-rh${safe_version} --build-arg "project=$CI_PROJECT_NAME"
                                                --build-arg "rpm_release=$rpm_release"
@@ -43,7 +41,7 @@ before_script:
     expire_in: 2 days
 
 .test: &test
-  image: ${docker_registry}redhawk/buildenv:$dist-$arch
+  image: ${docker_registry}redhawk/buildenv:${short_version}-$dist-$arch
   stage: test
   dependencies: []
   script:
@@ -191,21 +189,3 @@ deploy:
     - if [ -n "$jenkins_url" ]; then
         curl --insecure -X POST $jenkins_url/job/$CI_PROJECT_NAMESPACE/job/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME/buildWithParameters?pipeline_id=$CI_PIPELINE_ID --user $jenkins_user:$jenkins_api_token;
       fi
-  only:
-    - branches
-
-deploy:release:
-  image: centos:7
-  stage: deploy
-  dependencies: []
-  #Note, must set set associated redhawk_release
-  before_script:
-    - echo "Deploying to $jenkins_url/job/$rh_20_release/job/$CI_PROJECT_NAMESPACE/job/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME"
-    - echo "Deploying to $jenkins_url/job/$rh_21_release/job/$CI_PROJECT_NAMESPACE/job/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME"
-  script:
-    - if [ -n "$jenkins_url" ]; then
-        curl --insecure -X POST $jenkins_url/job/$rh_20_release/job/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME/buildWithParameters?pipeline_id=$CI_PIPELINE_ID --user $jenkins_user:$jenkins_api_token;
-        curl --insecure -X POST $jenkins_url/job/$rh_21_release/job/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME/buildWithParameters?pipeline_id=$CI_PIPELINE_ID --user $jenkins_user:$jenkins_api_token;
-      fi
-  only:
-    - tags
