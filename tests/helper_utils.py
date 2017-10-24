@@ -192,45 +192,6 @@ class MyDataSource(sb.DataSource):
         self.threadExited = True
 
 
-
-class MyDataSink(sb.DataSink):
-    def __init__(self):
-        sb.DataSink.__init__(self)
-
-    def getPort(self, portName):
-        try:
-            self._sinkPortType = self.getPortType(portName)
-            # Set up output array sink
-            if str(portName) == "xmlIn":
-                self._sink = _bulkio_data_helpers.XmlArraySink(eval(self._sinkPortType))
-            else:
-                self._sink = MyArraySink(eval(self._sinkPortType))
-            
-            if self._sink != None:
-                self._sinkPortObject = self._sink.getPort()
-                return self._sinkPortObject
-            else:
-                return None
-        except Exception, e:
-            print self.className + ":getPort(): failed " + str(e)
-            return None
-
-class MyArraySink(_bulkio_data_helpers.ArraySink):
-    def __init__(self, porttype):
-        _bulkio_data_helpers.ArraySink.__init__(self, porttype)
-        
-    def pushPacket(self, data, ts, EOS, stream_id):
-        self.port_lock.acquire()
-        if EOS:
-            self.gotEOS = True
-        else:
-            self.gotEOS = False
-        try:
-            packet = BufferedPacket(data, ts, EOS, stream_id, copy.deepcopy(self.sri))
-            self.data.append(packet)
-        finally:
-            self.port_lock.release()
-
 class ExpectedData(object):
     def __init__(self, faux_data=None):
         self.data1 = []
