@@ -561,7 +561,7 @@ class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
 
         
         delta_phase = self.config_params["frequency"] / self.config_params["sample_rate"]
-        expected_values = convert_function(signal_function(self.config_params["magnitude"], self.config_params["sample_rate"], dp=delta_phase ))
+        expected_values = convert_function(signal_function(self.config_params["magnitude"], int(self.config_params["sample_rate"]), dp=delta_phase ))
         n_expected = len(expected_values)
         minlength = min([len(rx_data),len(expected_values)])
         rx_data = rx_data[:minlength]
