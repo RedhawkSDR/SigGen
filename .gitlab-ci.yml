@@ -4,6 +4,11 @@ variables:
   namespace: rh.
   test_suite: test_$CI_PROJECT_NAME.py
 
+stages:
+  - build
+  - test
+  - deploy
+
 #Global before script, determine if this is a tag and handle rpm release field accordingly
 before_script:
     - safe_version=$(echo ${short_version} | tr -d -)
