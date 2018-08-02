@@ -224,6 +224,10 @@ deploy:
       done
     - repomanage --keep=2 --old $arch| xargs rm -f; createrepo --update $arch
     - /usr/bin/s3cmd sync -F -v --delete-removed $arch s3://$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/yum/$CI_COMMIT_REF_SLUG/rh${short_version}/$dist/  && s3cmd setacl -v s3://$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/yum/$CI_COMMIT_REF_SLUG/rh${short_version}/$dist --acl-public --recursive || true
+  except:
+    - master
+    - /^.*-external$/
+    - /^(\d+\.)?(\d+)?(\.\d+)$/
 
 deploy-el7-2.2:
   variables:
