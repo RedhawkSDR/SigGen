@@ -1,6 +1,7 @@
 variables:
   rh_20_release: '2-0-8'
   rh_22_release: '2-2-0'
+  rh_23_release: '2-3-0'
   namespace: rh.
   test_suite: test_$CI_PROJECT_NAME.py
 
@@ -140,6 +141,33 @@ package:el7:rh2.2:
     arch: x86_64
   <<: *package
 
+package:el6:rh2.3:
+  variables:
+    latest_version: 2.3-nightly
+    release_version: $rh_23_release
+    short_version: '2.3'
+    dist: el6
+    arch: x86_64
+  <<: *package
+
+package:el6-i386:rh2.3:
+  variables:
+    latest_version: 2.3-nightly
+    release_version: $rh_23_release
+    short_version: '2.3'
+    dist: el6
+    arch: i686
+  <<: *package
+
+package:el7:rh2.3:
+  variables:
+    latest_version: 2.3-nightly
+    release_version: $rh_23_release
+    short_version: '2.3'
+    dist: el7
+    arch: x86_64
+  <<: *package
+
 test:el6:rh2.0:
   variables:
     latest_version: 2.0-nightly
@@ -196,6 +224,33 @@ test:el7:rh2.2:
     arch: x86_64
   <<: *test
 
+test:el6:rh2.3:
+  variables:
+    latest_version: 2.3-nightly
+    release_version: $rh_23_release
+    short_version: '2.3'
+    dist: el6
+    arch: x86_64
+  <<: *test
+
+test:el6-i386:rh2.3:
+  variables:
+    latest_version: 2.3-nightly
+    release_version: $rh_23_release
+    short_version: '2.3'
+    dist: el6
+    arch: i686
+  <<: *test
+
+test:el7:rh2.3:
+  variables:
+    latest_version: 2.3-nightly
+    release_version: $rh_23_release
+    short_version: '2.3'
+    dist: el7
+    arch: x86_64
+  <<: *test
+
 deploy:
   image: ${docker_registry}centos:7
   stage: deploy
@@ -229,6 +284,15 @@ deploy:
     - /^.*-external$/
     - /^(\d+\.)?(\d+)?(\.\d+)$/
 
+deploy-el7-2.3:
+  variables:
+    dist: el7
+    arch: x86_64
+    short_version: '2.3'
+  dependencies:
+    - package:el7:rh2.3
+  <<: *s3
+
 deploy-el7-2.2:
   variables:
     dist: el7
@@ -247,6 +311,15 @@ deploy-el7-2.0:
     - package:el7:rh2.0
   <<: *s3
 
+deploy-el6-2.3:
+  variables:
+    dist: el6
+    arch: x86_64
+    short_version: '2.3'
+  dependencies:
+    - package:el6:rh2.3
+  <<: *s3
+
 deploy-el6-2.2:
   variables:
     dist: el6
@@ -263,6 +336,15 @@ deploy-el6-2.0:
     short_version: '2.0'
   dependencies:
     - package:el6:rh2.0
+  <<: *s3
+
+deploy-el6-i386-2.3:
+  variables:
+    dist: el6
+    arch: i686
+    short_version: '2.3'
+  dependencies:
+    - package:el6-i386:rh2.3
   <<: *s3
 
 deploy-el6-i386-2.2:
