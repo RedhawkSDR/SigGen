@@ -30,6 +30,9 @@ before_script:
     - ca
     - docker
   script:
+    - datetime=$(git show -s --format=%ci ${CI_COMMIT_SHA})
+    - sed -i -e "s/__REVISION__/${CI_COMMIT_SHA}/" ${namespace}$CI_PROJECT_NAME.spec
+    - sed -i -e "s/__DATETIME__/${datetime}/" ${namespace}$CI_PROJECT_NAME.spec
     - printf "FROM ${docker_registry}${rpmbuild_repository}rpmbuild:$dist-$arch-onbuild" > Dockerfile
     - docker login ${docker_registry} -u ${docker_user} -p ${docker_password}
     - docker image build --pull
@@ -43,6 +46,7 @@ before_script:
     - docker container cp $id:/root/rpmbuild/RPMS/ output/
     - docker container rm -f $id || true
     - docker image rm -f $CI_PROJECT_PATH_SLUG-$safe_ref-$dist-$arch-rh${safe_version} || true
+    - rpm -qip output/*/*.rpm
   artifacts:
     paths:
       - output/*/*.rpm
